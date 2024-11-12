@@ -46,10 +46,9 @@ def check_tags(html, char):
     if inside_para:
         line = line + char
     index += 1
-    print(line)
 
 def split_chunks(text):
-    print("processing text",text)
+    # print("processing text",text)
     n = 0
     stack = []
     runs = []
@@ -78,7 +77,7 @@ def split_chunks(text):
     return runs
 
 def process_html(html):
-    print("processing",html)
+    # print("processing",html)
     global index
     index = 0
     while index < len(html):
