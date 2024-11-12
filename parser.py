@@ -1,18 +1,7 @@
-#import requests
-from difflib import HtmlDiff
-
-# f = open("demofile.html")
-# html = f.read()
-
-#x = requests.get('https://joshondesign.com/c/projects')
-# x = requests.get('https://news.ycombinator.com/')
-#html = x.text
-
-#print("text is",html)
-index = 0
-inside_para = False
-paras = []
-line = ""
+# index = 0
+# inside_para = False
+# paras = []
+# line = ""
 
 paraTags = ["h1","h2","h3","h4","p","li","td"]
 
