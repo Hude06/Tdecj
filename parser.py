@@ -1,4 +1,5 @@
 #import requests
+from difflib import HtmlDiff
 
 # f = open("demofile.html")
 # html = f.read()
@@ -13,89 +14,90 @@ inside_para = False
 paras = []
 line = ""
 
-def starts_with(html,index,str):
-    # print("html is",html)
-    # print("index",index)
-    # print("str",str)
-    sub = html[index: index + len(str)]
-    # print("sub is",sub)
-    return sub == str
-
 paraTags = ["h1","h2","h3","h4","p","li","td"]
 
-def check_tags(html, char):
-    global index
-    global inside_para
-    global line
-    for tag in paraTags:
-        open_tag = "<"+tag+">"
-        close_tag = "</"+tag+">"
-        if html[index: index + len(open_tag)] == open_tag:
-            # print(open_tag)
-            index += len(open_tag)
-            inside_para = True
-            return
-        if html[index: index + len(close_tag)] == close_tag:
-            # print(close_tag)
-            index += len(close_tag)
-            paras.append(line)
-            line = ""
-            inside_para = False
-            return
-    # print("char",char,"inside",inside_para)
-    if inside_para:
-        line = line + char
-    index += 1
+# solo_tags = ["meta","link"]
+ignore_tags = ['meta','link', "!DOCTYPE",'script']
 
-def split_chunks(text):
-    # print("processing text",text)
-    n = 0
-    stack = []
-    runs = []
-    run = ""
-    while n < len(text):
-        if text[n:n+len("</")] == "</":
-            res = stack.pop()
-            # print("pop",res)
-            # print("adding run popped:", run)
-            runs.append(['link',res,run])
-            run = ""
-        if text[n:n+len("<")] == "<":
-            # print("push tag")
-            end_index = text.find(">",n)
-            # print("tag contents",text[n:end_index+1])
-            stack.append(text[n:end_index])
-            # print("adding run:", run)
-            runs.append(['plain',run])
-            n = end_index+1
-            run = ""
-            continue
-        run += text[n]
-        n += 1
-    runs.append(['plain',run])
-    # print("runs",runs)
-    return runs
+MAX_TEXT = 2500_0
+class HtmlParser:
+    def __init__(self):
+        self.stack = []
+        self.run = ""
+        self.runs = []
+        self.n = 0
+
+
+    def parse(self, text):
+        print("processing text",text[0:MAX_TEXT])
+        self.n = 0
+        self.runs = []
+        self.run = ""
+
+        while self.n < len(text) and self.n < MAX_TEXT:
+            if text[self.n:self.n+len("</")] == "</":
+                self.end_tag(text,self.n)
+                self.run = ""
+                continue
+            if text[self.n] == "<":
+                self.slurp_tag(text,self.n)
+                continue
+
+            self.run += text[self.n]
+            self.n += 1
+            # print(self.run)
+        self.save_run()
+        return self.runs
+
+    def slurp_tag(self, text, n):
+        end_index = text.find(">",n+1)
+        space_index = text.find(' ',n+1,end_index)
+        name = text[n+1:end_index]
+        # print(space_index, end_index)
+        # , '-'+text[n+1:space_index]+'-','vs','-'+text[n+1:end_index]+'-')
+        if space_index >= 0:
+        # if space_index < end_index:
+            name = text[n+1:space_index]
+        if  not (name in ignore_tags):
+            # print("push",name, text[n+1:end_index])
+            self.stack.append([name,text[n+1:end_index]])
+        self.save_run()
+        # if len(self.run) > 0:
+            # print("lost run:['"+name+"', '"+self.run+"']")
+            # self.runs.append(['plain',self.run])
+            # self.run = ""
+        self.n = end_index+1
+
+    def end_tag(self,text,n):
+        end_index = text.find(">",n+1)
+        name = text[n+2:end_index]
+        if name in ignore_tags:
+            # print("should ignore",name)
+            self.n = end_index+1
+            return
+        res = self.stack.pop()
+        # print("pop",res[0])
+        if name != res[0]:
+            print("pop mismatch", text[n+2:end_index],'vs',res)
+        if len(self.run) > 0:
+            # print("run:['"+name+"', '"+self.run+"']")
+            self.runs.append([name,self.run])
+            self.run = ""
+        self.n = end_index+1
+
+
+    def save_run(self):
+        if len(self.run) > 0:
+            # print("run:", self.run)
+            self.runs.append(['plain',self.run])
+            self.run = ""
+
 
 def process_html(html):
-    # print("processing",html)
-    global index
-    index = 0
-    while index < len(html):
-        check_tags(html, html[index])
-
-    chunks = []
-    for para in paras:
-        chunks.append(['para',split_chunks(para)])
-
-    for chunk in chunks:
-        # print("type",chunk[0])
-        for run in chunk[1]:
-            if run[0] == 'plain':
-                if len(run[1]) > 0:
-                    print(run[1], end='')
-            if run[0] == 'link' and len(run[2]) > 0:
-                print("*"+run[2]+"*", end='')
-        print("")
-
+    parser = HtmlParser()
+    chunks = parser.parse(html)
+    return chunks
+    # for chunk in chunks:
+    #     print(chunk)
 
 
