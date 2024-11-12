@@ -1,3 +1,5 @@
 import parser
+import requests
 
-parser.process_html("<html><p>hello there</p></html>")
+x = requests.get('https://joshondesign.com/c/writings')
+parser.process_html(x.text)

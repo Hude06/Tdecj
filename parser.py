@@ -78,10 +78,10 @@ def split_chunks(text):
     return runs
 
 def process_html(html):
+    print("processing",html)
+    global index
     index = 0
     while index < len(html):
-        # char = html[index]
-        # print("char",char)
         check_tags(html, html[index])
 
     chunks = []
