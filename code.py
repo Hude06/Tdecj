@@ -1,5 +1,6 @@
 import board
 import time
+import re
 import terminalio
 from adafruit_display_text import label
 from adafruit_display_shapes.rect import Rect
@@ -87,17 +88,44 @@ ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl_context)
 
 
-def fetch_url():
+def fetch_url(logterm):
     ssid = "JEFF22G"
+    # ssid = "JEFF22"
     password = "Jefferson2022"
-    TEXT_URL = "https://joshondesign.com/c/writings"
+    # TEXT_URL = "https://joshondesign.com/c/writings"
+    TEXT_URL = "https://joshondesign.com/2023/07/25/circuitpython-watch"
     try:
         wifi.radio.connect(ssid, password)
         print("Connected to", ssid)
         with requests.get(TEXT_URL) as response:
             # print(response.text)
             print("got the page")
-            parser.process_html(response.text)
+            chunks = parser.process_html(response.text)
+            for chunk in chunks:
+                if chunk[0] == 'h3':
+                    print("\n### ", chunk[1],"\n")
+                    continue
+                if chunk[0] == 'h2':
+                    print("\n## ", chunk[1],"\n")
+                    continue
+                if chunk[0] == 'h1':
+                    print("\n# ", chunk[1],"\n")
+                    continue
+                if chunk[0] == 'li':
+                    print("* ", chunk[1])
+                    continue
+                if chunk[0] == 'plain':
+                    print("", chunk[1])
+                    continue
+                if chunk[0] == 'p':
+                    print("", chunk[1],"\n")
+                    print("\r\n" + chunk[1], file=logterm, end="")
+                    continue
+                if chunk[0] == 'a':
+                    print("LINK ", chunk[1])
+                    print("\r\nLINK!" + chunk[1], file=logterm, end="")
+                    continue
+                print(chunk)
 
     except OSError as e:
         print("Failed to connect to", ssid, e)
@@ -154,7 +182,7 @@ splash = displayio.Group()
 fontx, fonty = terminalio.FONT.get_bounding_box()
 term_palette = displayio.Palette(2)
 term_palette[0] = 0x000000
-term_palette[1] = 0xffffff
+term_palette[1] = 0x33ff33
 logbox = displayio.TileGrid(terminalio.FONT.bitmap,
                             x=0,
                             y=0,
@@ -169,10 +197,59 @@ logterm = terminalio.Terminal(logbox, terminalio.FONT)
 display.root_group = splash
 
 # print("Hello Serial!", file=sys.stdout)  # serial console
-print("\r\nHello displayio!", file=logterm, end="")  # displayio
+print("\r\nHello displayio!", file=logterm, end="\r\n")  # displayio
 
-# while True:
-    # time.sleep(1)
-    # print("\r\nmore text", file=logterm, end="")
-# fetch_url()
-parser.process_html("<html><p>hello there</p></html>")
+# fetch_url(logterm)
+
+def fetch_disk_html(logterm):
+    with open("/test.html","r") as txt:
+        html = txt.read()
+        print("opened the file",html)
+        chunks = parser.process_html(html)
+        for chunk in chunks:
+            print(re.sub(r"\s",' ',chunk[1]))
+            ch = chunk[1].strip()
+            if len(ch) > 0:
+                if chunk[0] == 'h1':
+                    print("### ", file=logterm, end = "")
+                print(chunk[1].replace('\n',''), file=logterm, end="\r\n")
+
+fetch_disk_html(logterm)
+
+# print("\033["+"31m"+"Hello Serial!"+"\033["+"0m")  # serial console
+# print("\033["+"31m"+"Hello Serial!"+"\033["+"0m", file=logterm)  # serial console
+# print("\033[2J", file=logterm)
+
+def clear_screen(logterm):
+    print("\033[2J", file=logterm)
+
+# scroll up
+# for row in range(10 - 1, 0, -1):
+#     for column in range(0, 40):
+#         logbox[column, row] = logbox[column, row - 1]
+
+# scroll down
+# for row in range(0, 10 - 1):
+#     for column in range(0, 40):
+#         logbox[column, row] = logbox[column, row + 1]
+
+while True:
+    time.sleep(0.01)
+    keypress = tdeck.get_keypress()  
+    if keypress:
+        print("keypress-", keypress,"-")
+        # text_area.text = text_area.text + keypress
+        # layout.get_cell((0,selected)).background_color = 0xFFFFFF
+        # if keypress == 'j':
+        # logterm.write("\033[D")
+        # print(dir(logterm))
+        # scroll_back(logterm)
+        # logterm.write("\033[2J")
+        # print(dir(logbox))
+
+
+
+
+# print("\r\nmore text", file=logterm, end="")
+# parser.process_html("<html><p>hello there</p></html>")
+
