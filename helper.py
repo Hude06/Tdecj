@@ -166,11 +166,11 @@ class TDeck:
 
         # Trackball
         self._debug("Init Trackball")
-        print("up   is", board.TRACKBALL_UP)
-        print("right is", board.TRACKBALL_RIGHT)
-        print("down   is", board.TRACKBALL_DOWN)
-        print("left is", board.TRACKBALL_LEFT)
-        print("click ", board.TRACKBALL_CLICK)
+        # print("up   is", board.TRACKBALL_UP)
+        # print("right is", board.TRACKBALL_RIGHT)
+        # print("down   is", board.TRACKBALL_DOWN)
+        # print("left is", board.TRACKBALL_LEFT)
+        # print("click ", board.TRACKBALL_CLICK)
         self.trackball = trackball or Trackball(
             board.TRACKBALL_UP,
             board.TRACKBALL_RIGHT,
