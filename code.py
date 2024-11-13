@@ -211,7 +211,13 @@ def fetch_disk_html(logterm):
             ch = chunk[1].strip()
             if len(ch) > 0:
                 if chunk[0] == 'h1':
-                    print("### ", file=logterm, end = "")
+                    print("\r\n# ", file=logterm, end = "")
+                if chunk[0] == 'h2':
+                    print("\r\n## ", file=logterm, end = "")
+                if chunk[0] == 'h3':
+                    print("\r\n## ", file=logterm, end = "")
+                if chunk[0] == 'li':
+                    print("* ", file=logterm, end = "")
                 print(chunk[1].replace('\n',''), file=logterm, end="\r\n")
 
 fetch_disk_html(logterm)
