@@ -27,7 +27,11 @@ class BasicParsing(unittest.TestCase):
     def test_para_with_styles(self):
         parser = HtmlParser()
         chunks = parser.parse('<p>before\n<b>middle</b>\nafter</p>')
-        print(chunks)
+        # print("==== chunks ====")
+        # print(chunks)
+        self.assertEqual(chunks[0][0], "p")
+        self.assertEqual(chunks[1][0], "b")
+        self.assertEqual(chunks[2][0], "p")
 
 
     def test_live(self):

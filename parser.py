@@ -25,6 +25,8 @@ class HtmlParser:
                 continue
 
             ch = text[self.n]
+            if ch == '\n':
+                ch = ""
             self.run += ch
             self.n += 1
             # print(self.run)
@@ -32,19 +34,17 @@ class HtmlParser:
         return self.runs
 
     def slurp_tag(self, text, n):
+        self.save_run()
         end_index = text.find(">",n+1)
         space_index = text.find(' ',n+1,end_index)
         name = text[n+1:end_index]
         # print("slurping tag",name)
-        # print(space_index, end_index)
-        # , '-'+text[n+1:space_index]+'-','vs','-'+text[n+1:end_index]+'-')
         if space_index >= 0:
-        # if space_index < end_index:
             name = text[n+1:space_index]
         if  not (name in ignore_tags):
-            # print("push",name, text[n+1:end_index])
+            # print("pushing tag",name, text[n+1:end_index])
             self.stack.append([name,text[n+1:end_index]])
-        self.save_run()
+        # print('calling save run')
         # if len(self.run) > 0:
             # print("lost run:['"+name+"', '"+self.run+"']")
             # self.runs.append(['plain',self.run])
@@ -64,14 +64,18 @@ class HtmlParser:
             print("pop mismatch", text[n+2:end_index],'vs',res)
         if len(self.run) > 0:
             # print("run:['"+name+"', '"+self.run+"']")
+            # print("appending",name,self.run)
             self.runs.append([name,self.run])
             self.run = ""
         self.n = end_index+1
 
     def save_run(self):
         if len(self.run) > 0:
-            # print("run:", self.run)
-            self.runs.append(['plain',self.run])
+            # print("saving run:", self.stack[-1], self.run)
+            name = 'plain'
+            if len(self.stack) > 0 and self.stack[-1]:
+                name = self.stack[-1][0]
+            self.runs.append([name,self.run])
             self.run = ""
 
 
