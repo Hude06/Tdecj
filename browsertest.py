@@ -54,19 +54,19 @@ def fetch_url():
 
 def fetch_file():
     with open("blog.html", "r") as txt:
-        html = txt.read()
-        return html
+        return txt.read()
 
 # html = fetch_url()
 html = fetch_file()
 
 parser = HtmlParser()
 chunks = parser.parse(html)
-slice = chunks[1:50]
+slice = chunks[0:50]
 print("==== chunks ====")
 for chunk in slice:
     print(chunk)
 output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
+output_lines = output_lines[0:10]
 print(f"==== output lines ==== {len(output_lines)}")
 for line in output_lines:
     print(line)
