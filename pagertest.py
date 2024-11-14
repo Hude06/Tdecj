@@ -177,23 +177,21 @@ display.root_group = splash
 term = HighlightTerminal()
 splash.append(term.group)
 
-print("line count",len(output_lines))
-for line in output_lines:
-    term.print_line(line)
+start_line = 0
+def paginate():
+    print("line count",len(output_lines))
+    for i in range(start_line,min(start_line+5, len(output_lines))):
+        li = output_lines[i]
+        term.print_line(li)
 
+paginate()
 while True:
     keypress = tdeck.get_keypress()
     if keypress:
         print("keypress-", keypress,"-")
         if keypress == ' ':
             print("pressed space")
-    # click = tdeck.get_click()
-    # if click and click.pressed:
-        # popup.perform_selected_item()
-    # for p, c in tdeck.get_trackball():
-    #     if c > 0:
-    #         if p == "right":
-                # popup.select_next_item()
-            # if p == "left":
-                # popup.select_prev_item()
-    time.sleep(0.05)  # Simple debounce delay
+            start_line += 5
+            paginate()
+
+    time.sleep(0.05)
