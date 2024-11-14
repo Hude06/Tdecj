@@ -29,6 +29,11 @@ text_nodes = [
     ["A bold word.","bold"],
 ]
 
+# text_nodes = []
+# for i in range(0,100):
+#     text_nodes.append([f"line {i} ","plain"])
+
+
 
 
 def wrap_text(text, max_width):
@@ -68,7 +73,8 @@ def wrap_text(text, max_width):
     return lines
 
 
-output_lines = wrap_text(text_nodes,40)
+colcount = 40
+output_lines = wrap_text(text_nodes,colcount)
 
 
 tdeck = TDeck()
@@ -77,7 +83,9 @@ splash = displayio.Group()
 
 
 class HighlightTerminal:
-    def __init__(self):
+    def __init__(self, rowcount, colcount):
+        x = 0
+        y = 0
         fontx, fonty = terminalio.FONT.get_bounding_box()
         self.group = displayio.Group()
 
@@ -96,10 +104,12 @@ class HighlightTerminal:
         hpal2.make_transparent(0)
 
         pgrid = displayio.TileGrid(terminalio.FONT.bitmap,
-                                        x=0,
-                                        y=0,
-                                        width=display.width // fontx,
-                                        height=display.height // fonty,
+                                        x=x,
+                                        y=y,
+                                        # width=display.width // fontx,
+                                        width=colcount,
+                                        # height=display.height // fonty,
+                                        height=rowcount,
                                         tile_width=fontx,
                                         tile_height=fonty,
                                         pixel_shader=plain_palette)
@@ -107,10 +117,10 @@ class HighlightTerminal:
         self.group.append(pgrid)
 
         hgrid1 = displayio.TileGrid(terminalio.FONT.bitmap,
-                                            x=0,
-                                            y=0,
-                                            width=display.width // fontx,
-                                            height=display.height // fonty,
+                                            x=x,
+                                            y=y,
+                                            width=colcount,
+                                            height=rowcount,
                                             tile_width=fontx,
                                             tile_height=fonty,
                                             pixel_shader=hpal1)
@@ -118,10 +128,10 @@ class HighlightTerminal:
         self.group.append(hgrid1)
 
         hgrid2 = displayio.TileGrid(terminalio.FONT.bitmap,
-                                            x=0,
-                                            y=0,
-                                            width=display.width // fontx,
-                                            height=display.height // fonty,
+                                            x=x,
+                                            y=y,
+                                            width=colcount,
+                                            height=rowcount,
                                             tile_width=fontx,
                                             tile_height=fonty,
                                             pixel_shader=hpal2)
@@ -174,13 +184,17 @@ class HighlightTerminal:
 
 display.root_group = splash
 
-term = HighlightTerminal()
+# make it be only 5 rows
+rowcount = 10
+term = HighlightTerminal(rowcount+3,colcount+5)
 splash.append(term.group)
 
 start_line = 0
 def paginate():
-    print("line count",len(output_lines))
-    for i in range(start_line,min(start_line+5, len(output_lines))):
+    end_line = min(start_line+rowcount, len(output_lines))
+    print("line count",len(output_lines), start_line,"to",end_line)
+
+    for i in range(start_line,end_line):
         li = output_lines[i]
         term.print_line(li)
 
@@ -190,8 +204,16 @@ while True:
     if keypress:
         print("keypress-", keypress,"-")
         if keypress == ' ':
-            print("pressed space")
-            start_line += 5
+            start_line += rowcount
+            paginate()
+        if keypress == 't':
+            start_line = 0
+            paginate()
+        if keypress == 'j':
+            start_line += 1
+            paginate()
+        if keypress == 'k':
+            start_line -= 1
             paginate()
 
     time.sleep(0.05)
