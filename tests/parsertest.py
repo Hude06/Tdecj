@@ -25,6 +25,10 @@ class BasicParsing(unittest.TestCase):
     def test_whitespace_removal(self):
         self.simple_element("  <h1>   some html  </h1>  ","h1","some html")
         self.simple_element("  <a>   some html  </a>  ","a","some html")
+    def test_entity_replacement(self):
+        self.simple_element('<a href="foo">foo & bar</a>  ', "a", "foo & bar")
+        self.simple_element('<a href="foo">foo &amp; bar</a>  ', "a", "foo & bar")
+        self.simple_element('<a href="foo">foo &#x27; bar</a>  ', "a", "foo ' bar")
 
 
     def test_link(self):

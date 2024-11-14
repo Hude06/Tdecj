@@ -1,3 +1,4 @@
+import re
 paraTags = ["h1","h2","h3","h4","p","li","td"]
 solo_tags = ['img']
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
@@ -66,9 +67,7 @@ class HtmlParser:
             print("pop mismatch", text[n+2:end_index],'vs',res)
         txt = self.run.strip()
         if len(txt) > 0:
-            # print("appending run:['"+name+"', '"+txt+"']")
-            self.runs.append([name,txt])
-            self.run = ""
+            self.append_content(name,txt)
         self.n = end_index+1
 
     def save_run(self):
@@ -78,8 +77,14 @@ class HtmlParser:
             name = 'plain'
             if len(self.stack) > 0 and self.stack[-1]:
                 name = self.stack[-1][0]
-            self.runs.append([name,txt])
-            self.run = ""
+            self.append_content(name,txt)
+
+    def append_content(self, name, content):
+        # print("appending",content)
+        content = re.sub(r"&amp;", '&', content)
+        content = re.sub(r"&#x27;", "'", content)
+        self.runs.append([name,content])
+        self.run = ""
 
 
 def process_html(html):

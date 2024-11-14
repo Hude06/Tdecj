@@ -92,3 +92,12 @@ while True:
         if keypress == ' ':
             start_line += (ROWCOUNT-4)
             paginate()
+        if keypress == 't':
+            start_line = 0
+            paginate()
+        if keypress == 'j':
+            start_line += 1
+            paginate()
+        if keypress == 'k':
+            start_line -= 1
+            paginate()
