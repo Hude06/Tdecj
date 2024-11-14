@@ -177,6 +177,7 @@ display.root_group = splash
 term = HighlightTerminal()
 splash.append(term.group)
 
+print("line count",len(output_lines))
 for line in output_lines:
     term.print_line(line)
 
