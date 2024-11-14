@@ -5,7 +5,18 @@ import time
 from helper import TDeck
 
 # make some real text
-text = [
+text_nodes = [
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["A header","header"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["Some more plain text that is long and will have to break.","plain"],
+    ["A header","header"],
+    ["Some more plain text that is long and will have to break.","plain"],
     ["Some more plain text that is long and will have to break.","plain"],
     ["Some plain text.","plain"],
     ["Some plain text.","plain"],
@@ -18,73 +29,52 @@ text = [
     ["A bold word.","bold"],
 ]
 
-# wrap into 40 char wide lines
-lines = []
-max_width = 40
 
-# print("text: ",text)
-line = []
-current_width = 0
-for chunk in text:
-    if current_width + len(chunk[0]) > max_width:
-        # print(f"SPLIT: {chunk[0]}")
-        words = chunk[0].split()
-        before = ""
-        for word in words:
-            if current_width + len(before) > max_width:
-                # print(f"BREAK at word '{word}'",)
-                line.append([before,chunk[1]])
-                # print("LINE:",line)
-                lines.append(line)
-                line = []
-                before = ""
-                current_width = 0
-            before += word + " "
-        line.append([before,chunk[1]])
-        current_width += len(before)
-        continue
-    if chunk[1] == 'header':
-        # print("LINE:",line)
-        lines.append(line)
-        lines.append([chunk])
-        line = []
-        current_width = 0
-        continue
-    line.append(chunk)
-    current_width += len(chunk[0])
-    # current_width += 1 # account for spaces
-# print("LINE:",line)
-lines.append(line)
 
-def print_ruler():
-    ten = "        "
-    o = ""
-    for n in range(0,int(max_width/10)+1):
-        o += str(n) + "0" + ten
-    print(o)
+def wrap_text(text, max_width):
+    lines = []
+    line = []
+    current_width = 0
+    for chunk in text:
+        if current_width + len(chunk[0]) > max_width:
+            # print(f"SPLIT: {chunk[0]}")
+            words = chunk[0].split()
+            before = ""
+            for word in words:
+                if current_width + len(before) > max_width:
+                    # print(f"BREAK at word '{word}'",)
+                    line.append([before,chunk[1]])
+                    # print("LINE:",line)
+                    lines.append(line)
+                    line = []
+                    before = ""
+                    current_width = 0
+                before += word + " "
+            line.append([before,chunk[1]])
+            current_width += len(before)
+            continue
+        if chunk[1] == 'header':
+            # print("LINE:",line)
+            lines.append(line)
+            lines.append([chunk])
+            line = []
+            current_width = 0
+            continue
+        line.append(chunk)
+        current_width += len(chunk[0])
+        # current_width += 1 # account for spaces
+    # print("LINE:",line)
+    lines.append(line)
+    return lines
 
-    ten2 = "|123456789"
-    oo = ""
-    for n in range(0,int(max_width/10)+1):
-        oo += ten2
-    print(oo)
 
-# print_ruler()
-# print("")
-# for line in lines:
-#     print(print_line(line))
-# print("")
+output_lines = wrap_text(text_nodes,40)
 
 
 tdeck = TDeck()
 display = board.DISPLAY
 splash = displayio.Group()
 
-def make_spaces(txt):
-    space = ""
-    for i in range(0, len(txt)):
-        space += " "
-    return space
 
 class HighlightTerminal:
     def __init__(self):
@@ -138,20 +128,26 @@ class HighlightTerminal:
         self.hterm2 = terminalio.Terminal(hgrid2, terminalio.FONT)
         self.group.append(hgrid2)
 
+    def make_spaces(self, txt):
+        space = ""
+        for i in range(0, len(txt)):
+            space += " "
+        return space
+
     def print_plain(self, txt):
-        spc = make_spaces(txt)
+        spc = self.make_spaces(txt)
         print(txt, file=self.ptermx, end="")
         print(spc, file=self.hterm1, end="")
         print(spc, file=self.hterm2, end="")
 
     def print_hl1(self, txt):
-        spc = make_spaces(txt)
+        spc = self.make_spaces(txt)
         print(spc, file=self.ptermx, end="")
         print(txt, file=self.hterm1, end="")
         print(spc, file=self.hterm2, end="")
 
     def print_hl2(self, txt):
-        spc = make_spaces(txt)
+        spc = self.make_spaces(txt)
         print(spc, file=self.ptermx, end="")
         print(spc, file=self.hterm1, end="")
         print(txt, file=self.hterm2, end="")
@@ -181,7 +177,7 @@ display.root_group = splash
 term = HighlightTerminal()
 splash.append(term.group)
 
-for line in lines:
+for line in output_lines:
     term.print_line(line)
 
 while True:
