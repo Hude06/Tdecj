@@ -44,8 +44,9 @@ class HtmlParser:
             name = text[n+1:space_index]
         name = name.strip()
         if  not (name in ignore_tags):
-            # print(f"pushing tag '{name}'", text[n+1:end_index])
-            self.stack.append([name,text[n+1:end_index]])
+            atts = text[n+1:end_index]
+            # print(f"pushing tag '{name}':'{atts}'")
+            self.stack.append([name,atts])
         if name in solo_tags:
             res = self.stack.pop()
             # print(f"popping solo tag '{res[0]}'", text[n+1:end_index])
@@ -63,20 +64,21 @@ class HtmlParser:
         # print("pop",res[0])
         if name != res[0]:
             print("pop mismatch", text[n+2:end_index],'vs',res)
-        if len(self.run) > 0:
-            # print("run:['"+name+"', '"+self.run+"']")
-            # print("appending",name,self.run)
-            self.runs.append([name,self.run])
+        txt = self.run.strip()
+        if len(txt) > 0:
+            # print("appending run:['"+name+"', '"+txt+"']")
+            self.runs.append([name,txt])
             self.run = ""
         self.n = end_index+1
 
     def save_run(self):
-        if len(self.run) > 0:
-            # print("saving run:", self.stack[-1], self.run)
+        txt = self.run.strip()
+        if len(txt) > 0:
+            # print(f"saving run: '{txt}'")
             name = 'plain'
             if len(self.stack) > 0 and self.stack[-1]:
                 name = self.stack[-1][0]
-            self.runs.append([name,self.run])
+            self.runs.append([name,txt])
             self.run = ""
 
 

@@ -22,6 +22,11 @@ class BasicParsing(unittest.TestCase):
         self.simple_element('<a\n href="foo">some html</a>',"a","some html")
         self.simple_element('<img\n src="foo" alt="z" />',"img",'')
 
+    def test_whitespace_removal(self):
+        self.simple_element("  <h1>   some html  </h1>  ","h1","some html")
+        self.simple_element("  <a>   some html  </a>  ","a","some html")
+
+
     def test_link(self):
         parser = HtmlParser()
         chunks = parser.parse('<a href="https://google.com/">link to google</a>')
@@ -61,7 +66,7 @@ class BasicParsing(unittest.TestCase):
             print("==== chunks ====")
             for chunk in slice:
                 print(chunk)
-            self.assertEqual(len(chunks),34)
+            self.assertEqual(len(chunks),35)
 
     def test_blog_remote(self):
         text_url = "https://joshondesign.com/2023/07/25/circuitpython-watch"
@@ -76,7 +81,7 @@ class BasicParsing(unittest.TestCase):
             print("==== chunks ====")
             for chunk in slice:
                 print(chunk)
-            self.assertEqual(len(chunks),34)
+            self.assertEqual(len(chunks),35)
 
 
 if __name__ == '__main__':
