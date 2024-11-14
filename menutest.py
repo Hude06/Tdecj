@@ -44,8 +44,8 @@ def exit_menu(lay):
     lay.hidden = True
 
 menu = [
-    ['free RAM', print_free_memory],
-    ['system info', print_platform],
+    ['Free RAM', print_free_memory],
+    ['System info', print_platform],
     ['CPU Info', cpu_info],
     ['Exit', exit_menu]
     ]

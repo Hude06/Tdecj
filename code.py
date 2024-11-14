@@ -63,7 +63,7 @@ display = board.DISPLAY
 #     height=200,
 #     grid_size=(1, 15),
 #     cell_padding=2,
-# )    
+# )
 
 # _labels = []
 
@@ -135,7 +135,7 @@ def fetch_url(logterm):
 # # # Main loop
 # while True:
 #     # Check for click (currently does nothing, just prints)
-    # keypress = tdeck.get_keypress()  
+    # keypress = tdeck.get_keypress()
     # if keypress:
     #     # print("keypress-", keypress,"-")
     #     # text_area.text = text_area.text + keypress
@@ -186,7 +186,7 @@ term_palette[1] = 0x33ff33
 logbox = displayio.TileGrid(terminalio.FONT.bitmap,
                             x=0,
                             y=0,
-                            width=display.width // fontx,
+                            width=display.max_width // fontx,
                             height=display.height // fonty,
                             tile_width=fontx,
                             tile_height=fonty,
@@ -241,7 +241,7 @@ def clear_screen(logterm):
 
 while True:
     time.sleep(0.01)
-    keypress = tdeck.get_keypress()  
+    keypress = tdeck.get_keypress()
     if keypress:
         print("keypress-", keypress,"-")
         # text_area.text = text_area.text + keypress
