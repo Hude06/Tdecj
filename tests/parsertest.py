@@ -39,7 +39,7 @@ class BasicParsing(unittest.TestCase):
 
 
     def test_live(self):
-        with open("./test.html", "r") as txt:
+        with open("test.html", "r") as txt:
             html = txt.read()
             # print("opened the file", html)
             parser = HtmlParser()
@@ -50,7 +50,7 @@ class BasicParsing(unittest.TestCase):
             self.assertEqual(len(chunks),3)
 
     def test_blog(self):
-        with open("./blog.html", "r") as txt:
+        with open("blog.html", "r") as txt:
             html = txt.read()
             # print("opened the file", html)
             parser = HtmlParser()

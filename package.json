@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run-pager": "cp pagertest.py /Volumes/CIRCUITPY/code.py",
-    "run-browser": "cp browsertest.py /Volumes/CIRCUITPY/code.py"
+    "run-pager": "cp tests/pagertest.py /Volumes/CIRCUITPY/code.py",
+    "run-browser": "cp tests/browsertest.py /Volumes/CIRCUITPY/code.py"
   },
   "repository": {
     "type": "git",
