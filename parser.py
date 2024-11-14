@@ -10,7 +10,7 @@ class HtmlParser:
         self.n = 0
 
     def parse(self, text):
-        print("processing text",text[0:MAX_TEXT])
+        # print("processing text",text[0:MAX_TEXT])
         self.n = 0
         self.runs = []
         self.run = ""
@@ -38,11 +38,12 @@ class HtmlParser:
         end_index = text.find(">",n+1)
         space_index = text.find(' ',n+1,end_index)
         name = text[n+1:end_index]
-        # print("slurping tag",name)
+        # print(f"slurping tag '{name}'")
         if space_index >= 0:
             name = text[n+1:space_index]
+        name = name.strip()
         if  not (name in ignore_tags):
-            # print("pushing tag",name, text[n+1:end_index])
+            # print(f"pushing tag '{name}'", text[n+1:end_index])
             self.stack.append([name,text[n+1:end_index]])
         # print('calling save run')
         # if len(self.run) > 0:

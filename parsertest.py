@@ -16,6 +16,7 @@ class BasicParsing(unittest.TestCase):
         self.simple_element("<b>some html</b>","b","some html")
         self.simple_element("<i>some html</i>","i","some html")
         self.simple_element('<a href="foo">some html</a>',"a","some html")
+        self.simple_element('<a\n href="foo">some html</a>',"a","some html")
 
     def test_link(self):
         parser = HtmlParser()
