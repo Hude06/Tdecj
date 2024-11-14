@@ -2,10 +2,13 @@ import gc
 import sys
 import time
 
+import adafruit_connection_manager
+import adafruit_requests
 import board
 import displayio
 import microcontroller
 import terminalio
+import wifi
 from adafruit_button import Button
 from adafruit_display_text import label
 
@@ -13,6 +16,27 @@ from helper import TDeck
 
 tdeck = TDeck()
 display = board.DISPLAY
+pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
+requests = adafruit_requests.Session(pool, ssl_context)
+
+
+def wifiM(layout):
+    wifiGroup = displayio.Group()
+    y_position = 40
+    for network in wifi.radio.start_scanning_networks():
+        print(f"{network.ssid} [Ch:{network.channel}] RSSI: {network.rssi}")
+        wifiLabel = label.Label(
+            terminalio.FONT,
+            text=network.ssid,
+            color=0x000000,
+            background_color=0xFFFFFF,
+            x=10,
+            y=y_position,
+        )
+        wifiGroup.append(wifiLabel)
+        y_position += 30
+    display.root_group = wifiGroup
 
 
 def stats(layout):
@@ -103,6 +127,7 @@ menu = [
     ["System info", stats],
     ["Exit", exit_menu],
     ["Clock", clock],
+    ["Wifi", wifiM],
 ]
 
 
