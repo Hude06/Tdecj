@@ -15,31 +15,66 @@ tdeck = TDeck()
 display = board.DISPLAY
 
 
-def print_free_memory(layout):
-    print(f"used mem: {gc.mem_alloc()/1024}k")
-    print(f"free mem: {gc.mem_free()/1024}k")
-
-
-def print_platform(layout):
-    print("byteorder is", sys.byteorder)
-    print("impl is", sys.implementation)
-    print("maxsize is", sys.maxsize)
-    print("version is", sys.version)
-    print("version info", sys.version_info)
-    print("platform is", sys.platform)
-    print("modules is", sys.modules)
-
-
-def cpu_info(layout):
+def stats(layout):
+    statsGroup = displayio.Group()
     cpu = microcontroller.cpu
-    print(
-        "cpu is",
-        cpu.frequency / (1 * 1000 * 1000),
-        "mhz",
-        f"{cpu.temperature}C",
-        cpu.uid,
-        cpu.voltage,
+    version = sys.version
+    used_mem = gc.mem_alloc() / 1024
+    free_mem = gc.mem_free() / 1024
+
+    cpuLabel = label.Label(
+        terminalio.FONT,
+        text=f"CPU: {cpu.frequency / (1 * 1000 * 1000)}mhz",
+        color=0x000000,
+        background_color=0xFFFFFF,
+        padding_left=25,
+        padding_right=25,
+        padding_top=25,
+        padding_bottom=25,
+        y=40,
     )
+    cpuLabel.x = 10
+    statsGroup.append(cpuLabel)
+    versionLabel = label.Label(
+        terminalio.FONT,
+        text=f"Version: {version}",
+        color=0x000000,
+        background_color=0xFFFFFF,
+        padding_left=25,
+        padding_right=25,
+        padding_top=25,
+        padding_bottom=25,
+        y=90,
+    )
+    versionLabel.x = 10
+    statsGroup.append(versionLabel)
+    usedMemLabel = label.Label(
+        terminalio.FONT,
+        text=f"Used Mem: {used_mem}k",
+        color=0x000000,
+        background_color=0xFFFFFF,
+        padding_left=25,
+        padding_right=25,
+        padding_top=25,
+        padding_bottom=25,
+        y=130,
+    )
+    usedMemLabel.x = 10
+    statsGroup.append(usedMemLabel)
+    freeMemLabel = label.Label(
+        terminalio.FONT,
+        text=f"Free Mem: {free_mem}k",
+        color=0x000000,
+        background_color=0xFFFFFF,
+        padding_left=25,
+        padding_right=25,
+        padding_top=25,
+        padding_bottom=25,
+        y=170,
+    )
+    freeMemLabel.x = 10
+    statsGroup.append(freeMemLabel)
+    display.root_group = statsGroup
 
 
 def exit_menu(lay):
@@ -65,10 +100,8 @@ def clock(lay):
 
 
 menu = [
-    ["System info", print_platform],
-    ["CPU info", cpu_info],
+    ["System info", stats],
     ["Exit", exit_menu],
-    ["Free RAM", print_free_memory],
     ["Clock", clock],
 ]
 
