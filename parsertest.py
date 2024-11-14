@@ -6,17 +6,20 @@ class BasicParsing(unittest.TestCase):
     def simple_element(self,text,name,content):
         parser = HtmlParser()
         chunks = parser.parse(text)
+        print(chunks)
         self.assertEqual(len(chunks),1)
         self.assertEqual(chunks[0][0], name)
         self.assertEqual(chunks[0][1], content)
 
     def test_elements(self):
         self.simple_element("<h1>some html</h1>","h1","some html")
+        self.simple_element("<h1 extra>some html</h1>","h1","some html")
         self.simple_element("<a>some html</a>","a","some html")
         self.simple_element("<b>some html</b>","b","some html")
         self.simple_element("<i>some html</i>","i","some html")
         self.simple_element('<a href="foo">some html</a>',"a","some html")
         self.simple_element('<a\n href="foo">some html</a>',"a","some html")
+        self.simple_element('<img\n src="foo" alt="z" />',"img",'')
 
     def test_link(self):
         parser = HtmlParser()

@@ -1,4 +1,5 @@
 paraTags = ["h1","h2","h3","h4","p","li","td"]
+solo_tags = ['img']
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
 
 MAX_TEXT = 2500_0
@@ -45,11 +46,10 @@ class HtmlParser:
         if  not (name in ignore_tags):
             # print(f"pushing tag '{name}'", text[n+1:end_index])
             self.stack.append([name,text[n+1:end_index]])
-        # print('calling save run')
-        # if len(self.run) > 0:
-            # print("lost run:['"+name+"', '"+self.run+"']")
-            # self.runs.append(['plain',self.run])
-            # self.run = ""
+        if name in solo_tags:
+            res = self.stack.pop()
+            # print(f"popping solo tag '{res[0]}'", text[n+1:end_index])
+            self.runs.append([res[0],''])
         self.n = end_index+1
 
     def end_tag(self,text,n):
