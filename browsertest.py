@@ -66,7 +66,7 @@ print("==== chunks ====")
 for chunk in slice:
     print(chunk)
 output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
-output_lines = output_lines[0:10]
+output_lines = output_lines[0:50]
 print(f"==== output lines ==== {len(output_lines)}")
 for line in output_lines:
     print(line)
@@ -74,7 +74,7 @@ for line in output_lines:
 
 start_line = 0
 def paginate():
-    end_line = min(start_line+ROWCOUNT, len(output_lines))
+    end_line = min(start_line+(ROWCOUNT-2), len(output_lines))
     print("line count",len(output_lines), start_line,"to",end_line)
 
     for i in range(start_line,end_line):

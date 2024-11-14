@@ -3,6 +3,8 @@ import terminalio
 import displayio
 import time
 
+SINGLE_OUTPUT = True
+
 class HighlightTerminal:
     def __init__(self, rowcount, colcount):
         x = 0
@@ -67,26 +69,38 @@ class HighlightTerminal:
 
     def print_plain(self, txt):
         spc = self.make_spaces(txt)
-        print(txt, file=self.ptermx, end="")
-        print(spc, file=self.hterm1, end="")
-        print(spc, file=self.hterm2, end="")
+        if SINGLE_OUTPUT:
+            print(txt, file=self.ptermx, end="")
+        else:
+            print(txt, file=self.ptermx, end="")
+            print(spc, file=self.hterm1, end="")
+            print(spc, file=self.hterm2, end="")
 
     def print_hl1(self, txt):
         spc = self.make_spaces(txt)
-        print(spc, file=self.ptermx, end="")
-        print(txt, file=self.hterm1, end="")
-        print(spc, file=self.hterm2, end="")
+        if SINGLE_OUTPUT:
+            print(txt, file=self.ptermx, end="")
+        else:
+            print(spc, file=self.ptermx, end="")
+            print(txt, file=self.hterm1, end="")
+            print(spc, file=self.hterm2, end="")
 
     def print_hl2(self, txt):
         spc = self.make_spaces(txt)
-        print(spc, file=self.ptermx, end="")
-        print(spc, file=self.hterm1, end="")
-        print(txt, file=self.hterm2, end="")
+        if SINGLE_OUTPUT:
+            print(txt, file=self.ptermx, end="")
+        else:
+            print(spc, file=self.ptermx, end="")
+            print(spc, file=self.hterm1, end="")
+            print(txt, file=self.hterm2, end="")
 
     def print_newline(self):
-        print("", file=self.ptermx, end="\r\n")
-        print("", file=self.hterm1, end="\r\n")
-        print("", file=self.hterm2, end="\r\n")
+        if SINGLE_OUTPUT:
+            print("", file=self.ptermx, end="\r\n")
+        else:
+            print("", file=self.ptermx, end="\r\n")
+            print("", file=self.hterm1, end="\r\n")
+            print("", file=self.hterm2, end="\r\n")
 
     def print_line(self, line):
         for sect in line:
