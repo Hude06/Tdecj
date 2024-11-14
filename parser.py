@@ -1,12 +1,5 @@
-# index = 0
-# inside_para = False
-# paras = []
-# line = ""
-
 paraTags = ["h1","h2","h3","h4","p","li","td"]
-
-# solo_tags = ["meta","link"]
-ignore_tags = ['meta','link', "!DOCTYPE",'script']
+ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
 
 MAX_TEXT = 2500_0
 class HtmlParser:
@@ -15,7 +8,6 @@ class HtmlParser:
         self.run = ""
         self.runs = []
         self.n = 0
-
 
     def parse(self, text):
         print("processing text",text[0:MAX_TEXT])
@@ -32,7 +24,8 @@ class HtmlParser:
                 self.slurp_tag(text,self.n)
                 continue
 
-            self.run += text[self.n]
+            ch = text[self.n]
+            self.run += ch
             self.n += 1
             # print(self.run)
         self.save_run()
@@ -42,6 +35,7 @@ class HtmlParser:
         end_index = text.find(">",n+1)
         space_index = text.find(' ',n+1,end_index)
         name = text[n+1:end_index]
+        # print("slurping tag",name)
         # print(space_index, end_index)
         # , '-'+text[n+1:space_index]+'-','vs','-'+text[n+1:end_index]+'-')
         if space_index >= 0:
@@ -74,7 +68,6 @@ class HtmlParser:
             self.run = ""
         self.n = end_index+1
 
-
     def save_run(self):
         if len(self.run) > 0:
             # print("run:", self.run)
@@ -86,7 +79,5 @@ def process_html(html):
     parser = HtmlParser()
     chunks = parser.parse(html)
     return chunks
-    # for chunk in chunks:
-    #     print(chunk)
 
 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/main.css"/>
+    <script src="/static/main.js"></script>
+    <title>Circuit Python Watch Status</title></head>
+<body>
+<div id="content">
+    <div id="sidebar"><h1>Josh On Design</h1>
+        <ul class="social">
+            <li><a href="https://twitter.com/joshmarinacci"><span class="fa fa-twitter"></span></a></li>
+            <li><a href="http://www.linkedin.com/pub/joshua-marinacci/0/13b/a2a"><span class="fa fa-linkedin"></span></a></li>
+            <li><a href="/feed"><span class="fa fas fa-rss"></span></a></li>
+        </ul>
+        <ul class="links">
+            <li><a href="/">Blog</a></li>
+            <li><a href="/c/about">About Josh</a></li>
+            <li><a href="/c/writings">Books &amp; Writing</a></li>
+            <li><a href="/c/projects">Apps &amp; Projects</a></li>
+            <li><a href="/c/hire-me">Hire Me</a></li>
+        </ul>
+    </div>
+    <div class="main"><h2>Circuit Python Watch Status</h2>
+        <div class="content"><p>It&#x27;s been a bit since I&#x27;ve posted on my round screen watch project. Most of my time has
+            been taken up by work, travel, and family stuff, but I did have a few seconds to add a feature or two.</p>
+            <h3>New Screens</h3>
+            <p>The Waveshare board I&#x27;m using has a lipo battery charger inside it, but until now I hadn&#x27;t exposed it.
+                There is now as screen that shows the current battery percentage, though I think my calculations might be off. <a
+                        href="https://github.com/joshmarinacci/waveshare_lcd_test/blob/5654c0a0956a5a00f0a4425b5c15463ee53bc4f2/watch/battery.py">What
+                    do you think</a>?</p>
+            <p>I also added a <a
+                    href="https://github.com/joshmarinacci/waveshare_lcd_test/blob/5654c0a0956a5a00f0a4425b5c15463ee53bc4f2/watch/timer.py">screen
+                with a timer</a>. The actual timer itself works, but it won&#x27;t alert you when the timer ends if you switch to
+                another screen. I need to figure out some sort of a background task.</p>
+            <p>I also added a moon phase indicator using some calculations I found on the web. Again I&#x27;m not sure it&#x27;s
+                accurate, but the fun part is the star field particle effects behind the text. The hard part was figure out how to
+                draw lots separate pixels (one for each star) without forcing the entire screen to refresh. The secret is to call
+                bitmap.refresh() after each star is moved, rather than after drawing all the stars. If you do all the stars then
+                you get one giant dirty rectangle that fills the whole screen and will be slow. If you call refresh after only
+                changing two pixels (undrawing the old, then drawing the new), then in most cases you&#x27;ll have a dirty rect
+                that is only 2 or 4 pixels in size, which is super fast to draw. Even with 50 particles, the total pixels drawn
+                with my incremental approach is still a fraction of the full 240x240 screen size.</p><img
+                    src="https://joshondesign.com/images2/IMG_5878.jpeg" alt="z"/>
+            <h3>Sleeping</h3>
+            <p>The final big feature is making the watch sleep, though it&#x27;s only partially working. The screen will turn off
+                after N seconds of no input. This more than doubles the watch lifetime on a single charge. However, the touch
+                sensor and CPU are still running a full power, only the screen is off. The device does have a more advanced low
+                power mode that will wake up the main CPU when a tap is detected, but unfortunately it requires monitoring a
+                specific interrupt pin, which CircuitPython doesn&#x27;t support. There is some async io support in the form of a
+                counter api, that I plan to investigate next.</p>
+            <h3>Pausing</h3>
+            <p>I&#x27;m happy with the progress of my watch, but I&#x27;m pausing this project for now while I work on a few other
+                electronic projects. I recently built a set of animatronic eyes based on Will Cogley&#x27;s <a
+                        href="https://www.youtube.com/watch?v=Ftt9e8xnKE4">video tutoria</a>l, which I plan to expand into a
+                singing tiki head. I&#x27;m also experimenting with the new <a
+                        href="https://docs.circuitpython.org/en/latest/shared-bindings/synthio/index.html">synthio CircuitPython
+                    API</a> to build a step seqencer in a gameboy-like form factor.</p>
+            <p>As always, the <a href="https://github.com/joshmarinacci/waveshare_lcd_test">full source is on github</a>.</p>
+        </div>
+        <div class="comment"><b><i>Talk to me about it on <a href="http://twitter.com/joshmarinacci">Twitter</a></i></b></div>
+        <div class="after"><p>Posted July 25th, 2023</p>
+            <p>Tagged: <a href="/tags/circuitpython">circuitpython </a><a href="/tags/embedded">embedded </a></p></div>
+    </div>
+    <div id="banner"><a href="https://www.linkedin.com/in/joshmarinacci/">Like this? Hire Me!</a></div>
+</div>
+<div>
+    <!-- Fathom - simple website analytics - https://github.com/usefathom/fathom -->
+    <script>
+        (function (f, a, t, h, o, m) {
+            a[h] = a[h] || function () {
+                (a[h].q = a[h].q || []).push(arguments)
+            }
+            o = f.createElement('script'),
+                m = f.getElementsByTagName('script')[0]
+            o.async = 1
+            o.src = t
+            o.id = 'fathom-script'
+            m.parentNode.insertBefore(o, m)
+        })(document, window, '//stats.josh.earth/tracker.js', 'fathom')
+        fathom('set', 'siteId', 'JHKIT')
+        fathom('trackPageview')
+    </script>
+    <!-- / Fathom -->
+</div>
+</body>
+</html>
