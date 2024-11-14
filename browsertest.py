@@ -10,7 +10,6 @@ import adafruit_requests
 from line_breaker import LineBreaker
 from parser import HtmlParser
 from paging_terminal import HighlightTerminal
-from tests.pagertest import output_lines
 
 # init tdeck
 tdeck = TDeck()
@@ -19,7 +18,7 @@ splash = displayio.Group()
 display.root_group = splash
 
 COLCOUNT = 50
-ROWCOUNT = 20
+ROWCOUNT = 15
 
 # init highlighter
 term = HighlightTerminal(ROWCOUNT,COLCOUNT)
@@ -27,11 +26,11 @@ splash.append(term.group)
 
 term.print_line(["Loading...","plain"])
 
-# Initalize Wifi, Socket Pool, Request Session
 
 
 # fetch the page
 def fetch_url():
+    # Initalize Wifi, Socket Pool, Request Session
     print("initting wifi objects")
     pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
     ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
@@ -48,18 +47,9 @@ def fetch_url():
         print("Connected to", ssid)
         print("fetching",text_url)
         with requests.get(text_url) as response:
-            # print(response.text)
-            print("got the page",text_url)
-            print(f"{len(response.text)} bytes")
-            parser = HtmlParser()
-            chunks = parser.parse(response.text)
-
-            slice = chunks[1:50]
-            print("==== chunks ====")
-            for chunk in slice:
-                print(chunk)
-
-            return LineBreaker().wrap_text(slice,COLCOUNT-8)
+            # print("got the page",text_url)
+            # print(f"{len(response.text)} bytes")
+            return response.text
     except OSError as e:
         print("Failed to connect to", ssid, e)
         return
@@ -67,25 +57,22 @@ def fetch_url():
 def fetch_file():
     with open("blog.html", "r") as txt:
         html = txt.read()
-        parser = HtmlParser()
-        chunks = parser.parse(html)
-        slice = chunks[1:50]
-        print("==== chunks ====")
-        for chunk in slice:
-            print(chunk)
-        return LineBreaker().wrap_text(slice,COLCOUNT-8)
+        return html
 
-# parse into chunks
-# print chunks to stdout
-# wrap chunks into lines
-# display first N lines to the highlighting terminal
+# html = fetch_url()
+html = fetch_file()
 
-# output_lines = fetch_url()
-output_lines = fetch_file()
-print("==== output lines ====")
+parser = HtmlParser()
+chunks = parser.parse(html)
+slice = chunks[1:50]
+print("==== chunks ====")
+for chunk in slice:
+    print(chunk)
+output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
+print(f"==== output lines ==== {len(output_lines)}")
 for line in output_lines:
     print(line)
-#     term.print_line(line)
+    # term.print_line(line)
 
 start_line = 0
 def paginate():
@@ -105,5 +92,5 @@ while True:
     if keypress:
         print("keypress-", keypress,"-")
         if keypress == ' ':
-            start_line += ROWCOUNT
+            start_line += (ROWCOUNT-4)
             paginate()
