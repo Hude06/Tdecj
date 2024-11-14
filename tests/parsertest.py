@@ -1,5 +1,6 @@
 import unittest
 from parser import HtmlParser
+import requests
 
 
 class BasicParsing(unittest.TestCase):
@@ -49,14 +50,31 @@ class BasicParsing(unittest.TestCase):
                 print(chunk)
             self.assertEqual(len(chunks),3)
 
-    def test_blog(self):
+    def test_blog_local(self):
         with open("blog.html", "r") as txt:
             html = txt.read()
             # print("opened the file", html)
             parser = HtmlParser()
             chunks = parser.parse(html)
-            chunks = list(filter(lambda x: len(x[1].strip())>0,chunks))
-            for chunk in chunks:
+            slice = chunks[1:50]
+            # chunks = list(filter(lambda x: len(x[1].strip())>0,chunks))
+            print("==== chunks ====")
+            for chunk in slice:
+                print(chunk)
+            self.assertEqual(len(chunks),34)
+
+    def test_blog_remote(self):
+        text_url = "https://joshondesign.com/2023/07/25/circuitpython-watch"
+        with requests.get(text_url) as response:
+            print("got the page",text_url)
+            print(f"{len(response.text)} bytes")
+            html = response.text
+            parser = HtmlParser()
+            chunks = parser.parse(html)
+            slice = chunks[1:50]
+            # chunks = list(filter(lambda x: len(x[1].strip())>0,chunks))
+            print("==== chunks ====")
+            for chunk in slice:
                 print(chunk)
             self.assertEqual(len(chunks),34)
 

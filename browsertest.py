@@ -47,8 +47,6 @@ def fetch_url():
         print("Connected to", ssid)
         print("fetching",text_url)
         with requests.get(text_url) as response:
-            # print("got the page",text_url)
-            # print(f"{len(response.text)} bytes")
             return response.text
     except OSError as e:
         print("Failed to connect to", ssid, e)
