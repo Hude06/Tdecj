@@ -66,7 +66,7 @@ print("==== chunks ====")
 for chunk in slice:
     print(chunk)
 output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
-output_lines = output_lines[0:50]
+output_lines = output_lines[0:100]
 print(f"==== output lines ==== {len(output_lines)}")
 for line in output_lines:
     print(line)
