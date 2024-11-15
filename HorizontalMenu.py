@@ -12,6 +12,7 @@ import wifi
 from adafruit_button import Button
 from adafruit_display_text import label
 
+from custom_terminal_test import Browser
 from helper import TDeck
 
 tdeck = TDeck()
@@ -19,6 +20,9 @@ display = board.DISPLAY
 pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl_context)
+COLCOUNT = 50
+ROWCOUNT = 15
+broswer = Browser(displayio)
 
 
 def wifiM(layout):
@@ -123,11 +127,19 @@ def clock(lay):
     display.root_group = clockGroup
 
 
+def internet(lay):
+    broswer.render(
+        "https://joshondesign.com/2023/07/25/circuitpython-watch",
+    )
+    display.root_group = broswer.splash
+
+
 menu = [
     ["System info", stats],
     ["Exit", exit_menu],
     ["Clock", clock],
     ["Wifi", wifiM],
+    ["Internet", internet],
 ]
 
 
