@@ -17,12 +17,27 @@ from helper import TDeck
 
 tdeck = TDeck()
 display = board.DISPLAY
-pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
-ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
-requests = adafruit_requests.Session(pool, ssl_context)
+# pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+# ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
+# requests = adafruit_requests.Session(pool, ssl_context)
 COLCOUNT = 50
 ROWCOUNT = 15
-broswer = Browser(displayio)
+wifi_params = {
+    "pool": adafruit_connection_manager.get_radio_socketpool(wifi.radio),
+    "ssl_context": adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
+    "requests": adafruit_requests.Session(
+        adafruit_connection_manager.get_radio_socketpool(wifi.radio),
+        adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
+    ),
+    "ssid": "JEFF22G",  # You can change this to "JEFF22" if needed
+    "password": "Jefferson2022",
+}
+
+# Now connect using the correct wifi parameters
+wifi.radio.connect(wifi_params["ssid"], wifi_params["password"])
+broswer = Browser(displayio, wifi_params)
+
+# Correct the syntax and structure
 
 
 def wifiM(layout):

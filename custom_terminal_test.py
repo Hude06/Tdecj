@@ -25,13 +25,13 @@ def init_lines():
     return some_lines
 
 
-# lines = init_lines()
 class Browser:
-    def __init__(self, displayio):
+    def __init__(self, displayio, wifi_params):
         self.term = PagingTerminal()
         self.parser = HtmlParser()
         self.lines = []
         self.splash = displayio.Group()
+        self.wifi_params = wifi_params
 
     def to_str(self, line):
         ln = ""
@@ -46,28 +46,19 @@ class Browser:
     def fetch_url(self, url):
         # Initalize Wifi, Socket Pool, Request Session
         print("initting wifi objects")
-        pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
-        ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
-        requests = adafruit_requests.Session(pool, ssl_context)
 
-        ssid = "JEFF22G"
-        # ssid = "JEFF22"
-        password = "Jefferson2022"
         # TEXT_URL = "https://joshondesign.com/c/writings"
         text_url = url
         try:
-            print("connecting to", ssid)
-            wifi.radio.connect(ssid, password)
-            print("Connected to", ssid)
+            print("Connected to", self.wifi_params["ssid"])
             print("fetching", text_url)
-            with requests.get(text_url) as response:
+            with self.wifi_params["requests"].get(text_url) as response:
                 return response.text
         except OSError as e:
-            print("Failed to connect to", ssid, e)
+            print("Failed to connect to", self.wifi_params["ssid"], e)
             return
 
     def render(self, url):
-        self.splash = displayio.Group()
         html = self.fetch_url(url)
         chunks = self.parser.parse(html)
         slice = chunks[0:50]
