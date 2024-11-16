@@ -1,6 +1,6 @@
 import sys
 
-DEBUG = False
+DEBUG = True
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
@@ -17,6 +17,8 @@ def remap_name(name):
         return 'link'
     if name == 'p':
         return 'plain'
+    if name == 'li':
+        return 'plain'
     return name
 
 class LineBreaker:
@@ -30,7 +32,8 @@ class LineBreaker:
         for chunk in text:
             name = chunk[0]
             content = chunk[1]
-            dprint(f"wrapping [{name}] {content}")
+            atts = chunk[2]
+            dprint(f"wrapping [{name}] {content} {atts}")
             dprint(f" len = {len(content)}")
             name = remap_name(name)
             if name == 'header':
@@ -38,7 +41,7 @@ class LineBreaker:
                 ## finish the current line
                 lines.append(line)
                 ## add the header
-                lines.append([[content,name]])
+                lines.append([[content,name,atts]])
                 ## start new line
                 line = []
                 current_width = 0
@@ -50,17 +53,17 @@ class LineBreaker:
                 for word in words:
                     if current_width + len(before) > max_width:
                         dprint(f"BREAK at word '{word}'",)
-                        line.append([before,name])
+                        line.append([before,name,atts])
                         dprint("LINE:",line)
                         lines.append(line)
                         line = []
                         before = ""
                         current_width = 0
                     before += word + " "
-                line.append([before,name])
+                line.append([before,name,atts])
                 current_width += len(before)
                 continue
-            line.append([content,name])
+            line.append([content,name,atts])
             current_width += len(content)
             # current_width += 1 # account for spaces
         dprint("LINE:",line)

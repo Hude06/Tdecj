@@ -32,6 +32,10 @@ class Browser:
         self.lines = []
         self.splash = displayio.Group()
         self.wifi_params = wifi_params
+        self.text_url = ""
+        self.selected_link_index = 0
+        self.links = []
+        print("init browser")
 
     def to_str(self, line):
         ln = ""
@@ -40,6 +44,12 @@ class Browser:
             if span[1] == "header":
                 ln += "## " + span[0]
                 continue
+            if span[1] == "link":
+                if self.selected_link_index >= 0:
+                    if span == self.links[self.selected_link_index]:
+                        print("this is the selected link")
+                        ln += " **" + span[0] + "**"
+                        continue
             ln += span[0]
         return ln
 
@@ -48,26 +58,39 @@ class Browser:
         print("initting wifi objects")
 
         # TEXT_URL = "https://joshondesign.com/c/writings"
-        text_url = url
+        self.text_url = url
         try:
             print("Connected to", self.wifi_params["ssid"])
-            print("fetching", text_url)
-            with self.wifi_params["requests"].get(text_url) as response:
+            print("fetching", self.text_url)
+            with self.wifi_params["requests"].get(self.text_url) as response:
                 return response.text
         except OSError as e:
             print("Failed to connect to", self.wifi_params["ssid"], e)
             return
 
+    def fetch_file(self, filename):
+        with open(filename, "r") as txt:
+            return txt.read()
+
     def render(self, url):
-        html = self.fetch_url(url)
+        print("rendering", url)
+        # html = self.fetch_url(url)
+        html = self.fetch_file("links.html")
         chunks = self.parser.parse(html)
         slice = chunks[0:50]
         output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
         output_lines = output_lines[0:100]
         self.splash.append(self.term.grid)
+
+        # convert lines and spans to rows of plain text for the pager
         for line in output_lines:
             print(line)
             if len(line) > 0:
+                for span in line:
+                    # print("span",span)
+                    if span[1] == "link":
+                        print('we need to track this link',span)
+                        self.links.append(span)
                 if line[0][1] == "header":
                     self.lines.append(" ")
                 self.lines.append(self.to_str(line))
@@ -76,6 +99,11 @@ class Browser:
         self.term.load_lines(self.lines)
         self.term.render_screen()
 
+    def nav_next_link(self):
+        print("nav next link", self.links[self.selected_link_index])
+
+    def nav_prev_link(self):
+        print("nav prev link", self.links[self.selected_link_index])
 
 class PagingTerminal:
     def __init__(self):
@@ -127,9 +155,6 @@ class PagingTerminal:
         self.render_screen()
 
 
-def fetch_file():
-    with open("blog.html", "r") as txt:
-        return txt.read()
 
 
 # html = fetch_url()

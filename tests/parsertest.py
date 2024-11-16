@@ -21,6 +21,7 @@ class BasicParsing(unittest.TestCase):
         self.simple_element('<a href="foo">some html</a>',"a","some html")
         self.simple_element('<a\n href="foo">some html</a>',"a","some html")
         self.simple_element('<img\n src="foo" alt="z" />',"img",'')
+        self.simple_element("<li>some html</li>","li","some html")
 
     def test_whitespace_removal(self):
         self.simple_element("  <h1>   some html  </h1>  ","h1","some html")
@@ -37,6 +38,7 @@ class BasicParsing(unittest.TestCase):
         print(chunks)
         self.assertEqual(chunks[0][0], "a")
         self.assertEqual(chunks[0][1], "link to google")
+        self.assertEqual(chunks[0][2]['href'], "https://google.com/")
 
     def test_para_with_styles(self):
         parser = HtmlParser()

@@ -45,8 +45,9 @@ class HtmlParser:
             name = text[n+1:space_index]
         name = name.strip()
         if  not (name in ignore_tags):
-            atts = text[n+1:end_index]
-            # print(f"pushing tag '{name}':'{atts}'")
+            attrs_str = text[n+1 + len(name):end_index]
+            atts = self.parse_attributes(attrs_str)
+            # print(f"start elem '{name}'",atts)
             self.stack.append([name,atts])
         if name in solo_tags:
             res = self.stack.pop()
@@ -67,7 +68,7 @@ class HtmlParser:
             print("pop mismatch", text[n+2:end_index],'vs',res)
         txt = self.run.strip()
         if len(txt) > 0:
-            self.append_content(name,txt)
+            self.append_content(name,txt, res[1])
         self.n = end_index+1
 
     def save_run(self):
@@ -79,13 +80,30 @@ class HtmlParser:
                 name = self.stack[-1][0]
             self.append_content(name,txt)
 
-    def append_content(self, name, content):
+    def append_content(self, name, content, attrs=None):
         # print("appending",content)
         content = re.sub(r"&amp;", '&', content)
         content = re.sub(r"&#x27;", "'", content)
-        self.runs.append([name,content])
+        self.runs.append([name,content,attrs])
         self.run = ""
 
+    def parse_attributes(self, attrs_str):
+        # print(f"pushing tag '{name}':'{attrs_str}'")
+        attribs = attrs_str.split(" ")
+        atts = {}
+        # print("pairs",attribs)
+        for attr_str in attribs:
+            # print(f"pair {attr_str}")
+            if len(attr_str.strip()) > 0:
+                pair = attr_str.split("=")
+                # print("split", pair)
+                if len(pair) == 2:
+                    value = pair[1].strip()
+                    if value.startswith('"'):
+                        # print("get rid of quotes", value)
+                        value = value[1:-1]
+                    atts[pair[0]] = value
+        return atts
 
 def process_html(html):
     parser = HtmlParser()
