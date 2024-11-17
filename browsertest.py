@@ -1,6 +1,6 @@
 import time
 
-from custom_terminal_test import Browser
+from browser import Browser
 from parser import HtmlParser
 
 import adafruit_connection_manager
