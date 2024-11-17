@@ -4,6 +4,7 @@ from parser import HtmlParser
 import adafruit_requests
 import board
 import terminalio
+import time
 import wifi
 
 from line_breaker import LineBreaker
@@ -46,15 +47,17 @@ class Browser:
     def load_url(self, url):
         self.term.clear()
         self.term.render_row(0, "loading: " + url)
+        time.sleep(0.1)
         self.text_url = url
         try:
             print("Connected to", self.wifi_params["ssid"])
             print("fetching", self.text_url)
             with self.wifi_params["requests"].get(self.text_url) as response:
+                print("loaded bytes", len(response.text))
                 self.render_html(response.text)
         except OSError as e:
             print("Failed to load", url)
-            self.term.render_row(0, "failed to load: " + url)
+            self.term.render_row(0, "Failed to load: " + url)
             return
 
     def load_file(self, filename):
@@ -66,7 +69,7 @@ class Browser:
                 self.render_html(txt.read())
         except OSError as e:
             print("Failed to load", filename)
-            self.term.render_row(0, "failed to load: " + filename)
+            self.term.render_row(0, "Failed to load: " + filename)
 
     def render_html(self, html):
         # print("rendering", html)
