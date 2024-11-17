@@ -38,7 +38,7 @@ wifi.radio.connect(wifi_params["ssid"], wifi_params["password"])
 browser = Browser(wifi_params)
 display.root_group = browser.splash
 # browser.load_url("https://joshondesign.com/2023/07/25/circuitpython-watch")
-browser.fetch_file("links.html")
+browser.load_file("links.html")
 # handle input events
 while True:
     time.sleep(0.01)

@@ -49,18 +49,16 @@ class Browser:
             print("Connected to", self.wifi_params["ssid"])
             print("fetching", self.text_url)
             with self.wifi_params["requests"].get(self.text_url) as response:
-                html = response.text
-                self.render_html(html)
+                self.render_html(response.text)
         except OSError as e:
             print("Failed to load", url)
             return
 
-    def fetch_file(self, filename):
+    def load_file(self, filename):
         self.text_url = filename
         try:
             with open(filename, "r") as txt:
-                html = txt.read()
-                self.render_html(html)
+                self.render_html(txt.read())
         except OSError as e:
             print("Failed to load", filename)
 
