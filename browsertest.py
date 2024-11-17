@@ -12,14 +12,13 @@ import wifi
 
 from helper import TDeck
 
+
+WIFI_ENABLED = False
 # init tdeck
 tdeck = TDeck()
 display = board.DISPLAY
 splash = displayio.Group()
 display.root_group = splash
-
-COLCOUNT = 50
-ROWCOUNT = 15
 
 # init highlighter
 wifi_params = {
@@ -29,12 +28,15 @@ wifi_params = {
         adafruit_connection_manager.get_radio_socketpool(wifi.radio),
         adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
     ),
-    "ssid": "JEFF22G",  # You can change this to "JEFF22" if needed
+    "ssid": "JEFF22",  # You can change this to "JEFF22" if needed
     "password": "Jefferson2022",
 }
 
 # Now connect using the correct wifi parameters
-wifi.radio.connect(wifi_params["ssid"], wifi_params["password"])
+if WIFI_ENABLED:
+    print("connecting to wifi")
+    wifi.radio.connect(wifi_params["ssid"], wifi_params["password"])
+    print("connected to wifi")
 browser = Browser(wifi_params)
 display.root_group = browser.splash
 # browser.load_url("https://joshondesign.com/2023/07/25/circuitpython-watch")
@@ -46,7 +48,7 @@ while True:
     if keypress:
         print("keypressss-", keypress, "-")
         if keypress == ' ':
-            browser.term.scroll_down(10)
+            browser.page_down()
         if keypress == 'j':
             browser.nav_next_link()
         if keypress == 'k':
