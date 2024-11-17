@@ -35,10 +35,10 @@ wifi_params = {
 
 # Now connect using the correct wifi parameters
 wifi.radio.connect(wifi_params["ssid"], wifi_params["password"])
-browser = Browser(displayio, wifi_params)
-browser.render("https://joshondesign.com/2023/07/25/circuitpython-watch")
+browser = Browser(wifi_params)
 display.root_group = browser.splash
-
+# browser.load_url("https://joshondesign.com/2023/07/25/circuitpython-watch")
+browser.fetch_file("links.html")
 # handle input events
 while True:
     time.sleep(0.01)
@@ -51,4 +51,6 @@ while True:
             browser.nav_next_link()
         if keypress == 'k':
             browser.nav_prev_link()
+        if keypress == 'g':
+            browser.load_selected_link()
 

@@ -1,36 +1,27 @@
-import time
+
 from parser import HtmlParser
 
-import adafruit_connection_manager
 import adafruit_requests
 import board
-import displayio
 import terminalio
 import wifi
 
-from helper import TDeck
 from line_breaker import LineBreaker
+import displayio
 
-# tdeck = TDeck()
 display = board.DISPLAY
-# display.root_group = splash
 COLCOUNT = 50
 ROWCOUNT = 15
 
 
-def init_lines():
-    some_lines = []
-    for i in range(150):
-        some_lines.append(f"row {i} has some text. some more and longer text too")
-    return some_lines
-
-
 class Browser:
-    def __init__(self, displayio, wifi_params):
+    def __init__(self, wifi_params):
         self.term = PagingTerminal()
         self.parser = HtmlParser()
-        self.lines = []
+        self.text_lines = []
+        self.output_lines = []
         self.splash = displayio.Group()
+        self.splash.append(self.term.grid)
         self.wifi_params = wifi_params
         self.text_url = ""
         self.selected_link_index = 0
@@ -40,7 +31,6 @@ class Browser:
     def to_str(self, line):
         ln = ""
         for span in line:
-            # print("span is",span)
             if span[1] == "header":
                 ln += "## " + span[0]
                 continue
@@ -53,57 +43,72 @@ class Browser:
             ln += span[0]
         return ln
 
-    def fetch_url(self, url):
-        # Initalize Wifi, Socket Pool, Request Session
-        print("initting wifi objects")
-
-        # TEXT_URL = "https://joshondesign.com/c/writings"
+    def load_url(self, url):
         self.text_url = url
         try:
             print("Connected to", self.wifi_params["ssid"])
             print("fetching", self.text_url)
             with self.wifi_params["requests"].get(self.text_url) as response:
-                return response.text
+                html = response.text
+                self.render_html(html)
         except OSError as e:
-            print("Failed to connect to", self.wifi_params["ssid"], e)
+            print("Failed to load", url)
             return
 
     def fetch_file(self, filename):
-        with open(filename, "r") as txt:
-            return txt.read()
+        self.text_url = filename
+        try:
+            with open(filename, "r") as txt:
+                html = txt.read()
+                self.render_html(html)
+        except OSError as e:
+            print("Failed to load", filename)
 
-    def render(self, url):
-        print("rendering", url)
-        # html = self.fetch_url(url)
-        html = self.fetch_file("links.html")
+    def render_html(self, html):
+        # print("rendering", html)
         chunks = self.parser.parse(html)
-        slice = chunks[0:50]
-        output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
-        output_lines = output_lines[0:100]
-        self.splash.append(self.term.grid)
+        chunks = chunks[0:50]
+        # print("chunks", chunks)
+        self.output_lines = LineBreaker().wrap_text(chunks, COLCOUNT - 8)
+        self.output_lines = self.output_lines[0:100]
+        # print("output_lines", self.output_lines)
 
-        # convert lines and spans to rows of plain text for the pager
-        for line in output_lines:
-            print(line)
+        # track all links
+        for line in self.output_lines:
             if len(line) > 0:
                 for span in line:
-                    # print("span",span)
                     if span[1] == "link":
                         print('we need to track this link',span)
                         self.links.append(span)
-                if line[0][1] == "header":
-                    self.lines.append(" ")
-                self.lines.append(self.to_str(line))
-                if line[0][1] == "header":
-                    self.lines.append(" ")
-        self.term.load_lines(self.lines)
+        self.redraw_text()
+
+    # convert lines and spans to rows of plain text for the pager
+    def redraw_text(self):
+        self.text_lines.clear()
+        for line in self.output_lines:
+            print(line)
+            if len(line) > 0:
+                self.text_lines.append(self.to_str(line))
+        self.term.load_lines(self.text_lines)
         self.term.render_screen()
 
     def nav_next_link(self):
+        self.selected_link_index += 1
+        if self.selected_link_index >= len(self.links):
+            self.selected_link_index = 0
         print("nav next link", self.links[self.selected_link_index])
+        self.redraw_text()
 
     def nav_prev_link(self):
+        self.selected_link_index -= 1
+        if self.selected_link_index < 0:
+            self.selected_link_index = len(self.links) - 1
         print("nav prev link", self.links[self.selected_link_index])
+
+    def load_selected_link(self):
+        link = self.links[self.selected_link_index]
+        print("loading link", link)
+        self.load_url(link[2]['href'])
 
 class PagingTerminal:
     def __init__(self):
@@ -155,31 +160,3 @@ class PagingTerminal:
         self.render_screen()
 
 
-
-
-# html = fetch_url()
-# parser = HtmlParser()
-# chunks = parser.parse(html)
-# slice = chunks[0:50]
-# print("==== chunks ====")
-# # for chunk in slice:
-# #     print(chunk)
-# output_lines = LineBreaker().wrap_text(slice, COLCOUNT - 8)
-# output_lines = output_lines[0:100]
-# print(f"==== output lines ==== {len(output_lines)}")
-
-# add extra lines between headers
-
-# while True:
-#     time.sleep(0.01)
-#     keypress = tdeck.get_keypress()
-#     if keypress:
-#         print("keypress-", keypress, "-")
-#         if keypress == ' ':
-#             broswer.term.scroll_down(10)
-#         if keypress == 't':
-#             broswer.term.scroll_top()
-#         if keypress == 'j':
-#             broswer.term.scroll_down(1)
-#         if keypress == 'k':
-#             broswer.term.scroll_down(-1)

@@ -143,9 +143,7 @@ def clock(lay):
 
 
 def internet(lay):
-    broswer.render(
-        "https://joshondesign.com/2023/07/25/circuitpython-watch",
-    )
+    broswer.load_url("https://joshondesign.com/2023/07/25/circuitpython-watch")
     display.root_group = broswer.splash
 
 
