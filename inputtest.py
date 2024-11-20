@@ -1,13 +1,9 @@
-import audiobusio
-import audiocore
-import board
-import array
 import time
-import math
-
 from helper import TDeck
 
 tdeck = TDeck()
+
+print(f"Battery Voltage: {tdeck.get_battery_voltage():.2f} V")
 
 while True:
     time.sleep(0.01)
@@ -17,5 +13,4 @@ while True:
     for p, c in tdeck.get_trackball():
         if c > 0:
             print(f"trackball {p}: {c}")
-
 

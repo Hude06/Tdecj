@@ -24,15 +24,13 @@ Implementation Notes
   https://circuitpython.org/downloads
 """
 import sys
-import audiobusio
 import board
-import storage
+import analogio
 from countio import Counter
 
 # from digitalio import DigitalInOut
 from keypad import Event, Keys
 from micropython import const
-from sdcardio import SDCard
 
 try:
     from busio import I2C
@@ -47,6 +45,9 @@ __repo__ = "https://github.com/rgrizzell/CircuitPython_LILYGO_T-Deck.git"
 _KEYBOARD_I2C_ADDR = const(0x55)
 _MICROPHONE_I2C_ADDR = const(0x40)
 _TOUCHSCREEN_I2C_ADDR = const(0x14)
+R1 = 100000.0  # Resistor 1 (Ohms) 100k ohm
+R2 = 100000.0  # Resistor 2 (Ohms) 100k ohm
+VREF = 3.3
 
 
 class Keyboard:
@@ -174,12 +175,16 @@ class TDeck:
         self.trackball = trackball or Trackball(
             board.TRACKBALL_UP,
             board.TRACKBALL_RIGHT,
-            board.IO4,
+            board.TRACKBALL_DOWN,
             board.TRACKBALL_LEFT,
             board.TRACKBALL_CLICK,
         )
         self.get_trackball = self.trackball.get_trackball
         self.get_click = self.trackball.get_click
+
+        self._debug("Init battery monitor")
+        self.adc = analogio.AnalogIn(board.BAT_ADC)
+
 
         # SD Card
         # self._debug("Init SD Card")
@@ -216,6 +221,16 @@ class TDeck:
 
         # LoRa - Optional
         # self._debug("Init LoRa")
+
+    def get_voltage(self):
+        # Read the raw ADC value and convert it to a voltage
+        raw = self.adc.value  # Raw ADC value (16-bit in CircuitPython)
+        voltage = (raw / 65535.0) * VREF
+        return voltage
+
+    def get_battery_voltage(self):
+        battery_voltage = self.get_voltage() * (R1 + R2) / R2  # Scale up based on the voltage divider
+        return battery_voltage
 
     def _debug(self, msg):
         if self.debug:
