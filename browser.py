@@ -88,7 +88,10 @@ class Browser:
             for line in lb.wrap_text([chunk],30):
                 dprint("line is",line[0])
                 self.output_lines.append(line[0])
+                # print('redrawing')
                 self.redraw_text()
+                self.display.refresh()
+                time.sleep(0.5)
         # # track all links
         # for line in self.output_lines:
         #     if len(line) > 0:
