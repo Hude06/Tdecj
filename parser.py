@@ -1,4 +1,11 @@
 import re
+import sys
+
+DEBUG = False
+def dprint(*args, **kwargs):
+    if DEBUG:
+        print(*args, file=sys.stderr, **kwargs)
+
 paraTags = ["h1","h2","h3","h4","p","li","td"]
 solo_tags = ['img']
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
@@ -18,20 +25,29 @@ class HtmlParser:
         self.run = ""
 
         while self.n < len(text) and self.n < MAX_TEXT:
+            ch = text[self.n]
+            dprint(self.n,"char -",ch,"-")
+
             if text[self.n:self.n+len("</")] == "</":
                 self.end_tag(text,self.n)
+                dprint("elem is", self.runs)
+                if len(self.runs) < 1:
+                    dprint("not enough space")
+                else:
+                    elem = self.runs[len(self.runs)-1]
+                    dprint("the end tag is", elem)
+                    yield elem
                 self.run = ""
                 continue
             if text[self.n] == "<":
                 self.slurp_tag(text,self.n)
                 continue
 
-            ch = text[self.n]
             if ch == '\n':
                 ch = ""
             self.run += ch
             self.n += 1
-            # print(self.run)
+            dprint('self run:-', self.run,"-")
         self.save_run()
         return self.runs
 
@@ -58,14 +74,15 @@ class HtmlParser:
     def end_tag(self,text,n):
         end_index = text.find(">",n+1)
         name = text[n+2:end_index]
+        dprint("end tag name",name)
         if name in ignore_tags:
-            # print("should ignore",name)
+            dprint("should ignore",name)
             self.n = end_index+1
             return
         res = self.stack.pop()
-        # print("pop",res[0])
+        dprint("pop",res[0])
         if name != res[0]:
-            print("pop mismatch", text[n+2:end_index],'vs',res)
+            dprint("pop mismatch", text[n+2:end_index],'vs',res)
         txt = self.run.strip()
         if len(txt) > 0:
             self.append_content(name,txt, res[1])
@@ -74,7 +91,7 @@ class HtmlParser:
     def save_run(self):
         txt = self.run.strip()
         if len(txt) > 0:
-            # print(f"saving run: '{txt}'")
+            dprint(f"saving run: '{txt}'")
             name = 'plain'
             if len(self.stack) > 0 and self.stack[-1]:
                 name = self.stack[-1][0]

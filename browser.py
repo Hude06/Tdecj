@@ -1,23 +1,23 @@
-
 from parser import HtmlParser
-
-import adafruit_requests
-import board
 import terminalio
 import time
-import wifi
+import sys
 
 from line_breaker import LineBreaker
 import displayio
 
-display = board.DISPLAY
-COLCOUNT = 50
+COLCOUNT = 30
 ROWCOUNT = 10
 
 
+DEBUG = False
+def dprint(*args, **kwargs):
+    if DEBUG:
+        print(*args, file=sys.stderr, **kwargs)
+
 class Browser:
-    def __init__(self, wifi_params):
-        self.term = PagingTerminal()
+    def __init__(self, wifi_params, display):
+        self.term = PagingTerminal(display)
         self.parser = HtmlParser()
         self.text_lines = []
         self.output_lines = []
@@ -27,21 +27,25 @@ class Browser:
         self.text_url = ""
         self.selected_link_index = 0
         self.links = []
-        print("init browser")
+        self.display = display
+        dprint("init browser")
 
     def to_str(self, line):
         ln = ""
-        for span in line:
-            if span[1] == "header":
-                ln += "## " + span[0]
-                continue
-            if span[1] == "link":
-                if self.selected_link_index >= 0:
-                    if span == self.links[self.selected_link_index]:
-                        print("this is the selected link")
-                        ln += " **" + span[0] + "**"
-                        continue
-            ln += span[0]
+        if len(line) < 1:
+            dprint("bad line", line)
+            return "bad line"
+
+        if line[1] == "header":
+            ln += "## " + line[0]
+            return ln
+        # if span[1] == "link":
+        #     if self.selected_link_index >= 0:
+        #         if span == self.links[self.selected_link_index]:
+        #             print("this is the selected link")
+        #             ln += " **" + span[0] + "**"
+        #             continue
+        ln += line[0]
         return ln
 
     def load_url(self, url):
@@ -50,13 +54,13 @@ class Browser:
         time.sleep(0.1)
         self.text_url = url
         try:
-            print("Connected to", self.wifi_params["ssid"])
-            print("fetching", self.text_url)
+            dprint("Connected to", self.wifi_params["ssid"])
+            dprint("fetching", self.text_url)
             with self.wifi_params["requests"].get(self.text_url) as response:
-                print("loaded bytes", len(response.text))
+                dprint("loaded bytes", len(response.text))
                 self.render_html(response.text)
         except OSError as e:
-            print("Failed to load", url)
+            dprint("Failed to load", url)
             self.term.render_row(0, "Failed to load: " + url)
             return
 
@@ -68,32 +72,37 @@ class Browser:
             with open(filename, "r") as txt:
                 self.render_html(txt.read())
         except OSError as e:
-            print("Failed to load", filename)
+            dprint("Failed to load", filename)
             self.term.render_row(0, "Failed to load: " + filename)
 
     def render_html(self, html):
-        # print("rendering", html)
-        chunks = self.parser.parse(html)
-        chunks = chunks[0:50]
-        # print("chunks", chunks)
-        self.output_lines = LineBreaker().wrap_text(chunks, COLCOUNT - 8)
-        self.output_lines = self.output_lines[0:100]
-        # print("output_lines", self.output_lines)
-
-        # track all links
-        for line in self.output_lines:
-            if len(line) > 0:
-                for span in line:
-                    if span[1] == "link":
-                        print('we need to track this link',span)
-                        self.links.append(span)
-        self.redraw_text()
+        dprint("rendering", len(html), "bytes")
+        lb = LineBreaker()
+        count = 0
+        for chunk in self.parser.parse(html):
+            dprint("got a chunk",chunk)
+            count += 1
+            if count > 30:
+                dprint("done with chunks")
+                break
+            for line in lb.wrap_text([chunk],30):
+                dprint("line is",line[0])
+                self.output_lines.append(line[0])
+                self.redraw_text()
+        # # track all links
+        # for line in self.output_lines:
+        #     if len(line) > 0:
+        #         for span in line:
+        #             if span[1] == "link":
+        #                 print('we need to track this link',span)
+        #                 self.links.append(span)
+        # self.redraw_text()
 
     # convert lines and spans to rows of plain text for the pager
     def redraw_text(self):
         self.text_lines.clear()
         for line in self.output_lines:
-            print(line)
+            dprint('converting line', line)
             if len(line) > 0:
                 self.text_lines.append(self.to_str(line))
         self.term.render_row(0, "loaded: "+self.text_url)
@@ -101,7 +110,7 @@ class Browser:
             if i >= len(self.text_lines):
                 continue
             line = self.text_lines[i]
-            print(line)
+            dprint("line",line)
             self.term.render_row(i+1,line)
         self.term.render_row(17, "j = next link, k = prev link, g = load link")
 
@@ -109,26 +118,27 @@ class Browser:
         self.selected_link_index += 1
         if self.selected_link_index >= len(self.links):
             self.selected_link_index = 0
-        print("nav next link", self.links[self.selected_link_index])
+        dprint("nav next link", self.links[self.selected_link_index])
         self.redraw_text()
 
     def nav_prev_link(self):
         self.selected_link_index -= 1
         if self.selected_link_index < 0:
             self.selected_link_index = len(self.links) - 1
-        print("nav prev link", self.links[self.selected_link_index])
+        dprint("nav prev link", self.links[self.selected_link_index])
 
     def load_selected_link(self):
         link = self.links[self.selected_link_index]
         self.load_url(link[2]['href'])
 
     def page_down(self):
-        print("pretending to page down")
+        dprint("pretending to page down")
 
 
 class PagingTerminal:
-    def __init__(self):
+    def __init__(self, display):
         # self.rows = []
+        self.display = display
         self.current_row = 0
         self.font = terminalio.FONT
         font_w, font_h = terminalio.FONT.get_bounding_box()
@@ -140,9 +150,9 @@ class PagingTerminal:
             terminalio.FONT.bitmap,
             x=0,
             y=0,
-            width=display.width // font_w,
+            width=self.display.width // font_w,
             # width=40,
-            height=display.height // font_h,
+            height=self.display.height // font_h,
             # height=10,
             tile_width=font_w,
             tile_height=font_h,

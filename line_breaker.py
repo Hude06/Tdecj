@@ -1,6 +1,6 @@
 import sys
 
-DEBUG = True
+DEBUG = False
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
@@ -25,11 +25,11 @@ class LineBreaker:
     def __init__(self):
         pass
 
-    def wrap_text(self,text, max_width):
+    def wrap_text(self, chunks, max_width):
         lines = []
         line = []
         current_width = 0
-        for chunk in text:
+        for chunk in chunks:
             name = chunk[0]
             content = chunk[1]
             atts = chunk[2]
@@ -55,6 +55,7 @@ class LineBreaker:
                         dprint(f"BREAK at word '{word}'",)
                         line.append([before,name,atts])
                         dprint("LINE:",line)
+                        yield line
                         lines.append(line)
                         line = []
                         before = ""
