@@ -1,4 +1,6 @@
 import time
+from math import floor
+
 import terminalio
 import displayio
 from waveshare128 import setup_display
@@ -31,53 +33,52 @@ class MulticolorTextGrid:
         self.font = font
         font_w, font_h = self.font.get_bounding_box()
         print("font bitmap size", self.font.bitmap.width, self.font.bitmap.height)
+        print("font tile count", self.font.bitmap.width/font_w)
         self.font_w = font_w
         self.font_h = font_h
         self.palette = palette
-        self.base_text = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        self.bitmap = displayio.Bitmap(self.font_w*len(self.base_text),
-                                       self.font_h*len(palette),
-                                       len(palette))
+        self.base_text = " ABC"
+        self.bitmap = displayio.Bitmap(self.font.bitmap.width,
+                                       self.font.bitmap.height * len(self.palette),
+                                       len(self.palette))
         print("new bitmap size ", self.bitmap.width, self.bitmap.height)
         self.tile_grid = displayio.TileGrid(self.bitmap,
                                             pixel_shader=palette,
                                             tile_width=font_w,
                                             tile_height=font_h,
-                                            width=font_w*10,
-                                            height=font_h*5)
-
-        for n, ch in enumerate(self.base_text):
-            for i in range(len(palette)-1):
-                self.draw_letter(ch, n * font_w, i * font_h, i+1)
-
-    def draw_letter(self, letter, xo, yo, color):
-        # print("stamping ", letter, 'at',xo,yo,'in color',color)
-        glyph = self.font.get_glyph(ord(letter))
-        for i in range(0, glyph.width):
-            for j in range (0, glyph.height):
-                pixel = glyph.bitmap[i + glyph.tile_index * glyph.width,j]
+                                            width=font_w*self.cols,
+                                            height=font_h*self.rows)
+        for i in range(self.font.bitmap.width):
+            for j in range(self.font.bitmap.height):
+                pixel = self.font.bitmap[i, j]
                 if pixel == 1:
-                    pixel = color
-                self.bitmap[i+xo,j+yo] = pixel
+                    for c in range(len(self.palette)-1):
+                        self.bitmap[i, j + font_h*c] = c+1
 
     def set_text(self, x, y, text, color):
+        tc = floor(self.bitmap.width / self.font_w)
+        # print("tc",tc)
         for n, ch in enumerate(text):
             fx = x + n
             # print(ch, ord(ch),'x',x,n,fx)
             if fx < self.cols:
-                self.tile_grid[fx,y] = ord(ch) - 65 + 1 + len(self.base_text) * color
-
+                glyph = self.font.get_glyph(ord(ch))
+                # print("glyph",glyph.tile_index,'ch',color*tc)
+                self.tile_grid[fx,y] = glyph.tile_index + color*tc
 
 group = displayio.Group()
-group.x = 120
+group.x = 60
 group.y = 120
 
-text_grid = MulticolorTextGrid(4,10,terminalio.FONT, palette)
-text_grid.set_text(0,0,"ABC",1)
-text_grid.set_text(3,0,"ABC",2)
-text_grid.set_text(6,0,"ABC",0)
+text_grid = MulticolorTextGrid(4,30,terminalio.FONT, palette)
+text_grid.set_text(0,0,"Some cool text",0)
+text_grid.set_text(15,0,"including",1)
+text_grid.set_text(0,1,"red",1)
+# text_grid.set_text(4,1,"and blue",2)
+text_grid.set_text(0,2,"and back to white",0)
+
 group.append(text_grid.tile_grid)
-group.scale = 2
+group.scale = 1
 display.root_group = group
 while True:
     display.refresh()
