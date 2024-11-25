@@ -1,7 +1,7 @@
 import re
 import sys
 
-DEBUG = False
+DEBUG = True
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
@@ -33,23 +33,25 @@ class HtmlParser:
 
             # end element
             if text[self.n:self.n+len("</")] == "</":
-                dprint("ending element")
                 end_index = text.find(">", self.n + 1)
                 name = text[self.n + 2:end_index]
-                dprint("end tag name", name)
+                dprint(f"end tag: {name}")
                 elem = self.elems.pop()
                 # print("ending elem",elem)
+                if name != elem[0]:
+                    dprint("pop mismatch", name,'vs',elem[0])
 
-                elem.append(self.make_span(self.span))
+                self.append_span(elem)
+                # elem.append(self.make_span(self.span))
                 self.span = ""
 
                 # print("ending elem",elem)
                 if elem[0] in block_elements:
-                    # print("yielding block",elem)
+                    dprint("yielding block",elem)
                     yield elem
                 else:
-                    # print("appending to parent")
                     if elem[0] not in ignore_tags:
+                        dprint("appending to parent", elem)
                         if len(self.elems) > 0:
                             self.elems[-1].append(elem)
                         else:
