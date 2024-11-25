@@ -41,7 +41,7 @@ if WIFI_ENABLED:
     print("connecting to wifi")
     wifi.radio.connect(wifi_params["ssid"], wifi_params["password"])
     print("connected to wifi")
-browser = Browser(wifi_params, display, cols=40, page_size=12)
+browser = Browser(wifi_params, display, cols=40, page_size=16)
 display.root_group = browser.splash
 # browser.load_url("https://joshondesign.com/2023/07/25/circuitpython-watch")
 browser.load_file("blog.html")

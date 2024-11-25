@@ -9,7 +9,7 @@ import displayio
 COLCOUNT = 30
 
 
-DEBUG = True
+DEBUG = False
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
@@ -33,21 +33,27 @@ class Browser:
         dprint("init browser")
 
     def to_str(self, line):
+        dprint("to_str", line)
         ln = ""
         if len(line) < 1:
             dprint("bad line", line)
             return "bad line"
 
-        if line[1] == "header":
-            ln += "## " + line[0]
-            return ln
+        type = line[0]
+        if type == "blank":
+            return ""
+        if type == "header":
+            ln += "## "
+        for span in line[1:]:
+            ln = ln + span[1]
+
         # if span[1] == "link":
         #     if self.selected_link_index >= 0:
         #         if span == self.links[self.selected_link_index]:
         #             print("this is the selected link")
         #             ln += " **" + span[0] + "**"
         #             continue
-        ln += line[0]
+        # ln += line[0]
         return ln
 
     def load_url(self, url):
@@ -87,13 +93,14 @@ class Browser:
             if count > 500:
                 dprint("done with chunks")
                 break
-            for line in lb.wrap_text([chunk],self.cols):
-                # dprint("line is",line[0])
-                self.output_lines.append(line[0])
+            for line in lb.wrap_text2([chunk],self.cols):
+                dprint("line is",line)
+                self.output_lines.append(line)
             # print('redrawing')
             self.redraw_text()
             self.display.refresh()
-            time.sleep(0.01)
+            time.sleep(0)
+        dprint("done with chunks")
         # # track all links
         # for line in self.output_lines:
         #     if len(line) > 0:
@@ -107,9 +114,7 @@ class Browser:
     def redraw_text(self):
         self.text_lines.clear()
         for line in self.output_lines:
-            # dprint('converting line', line)
-            if len(line) > 0:
-                self.text_lines.append(self.to_str(line))
+            self.text_lines.append(self.to_str(line))
         self.term.render_row(0, "loaded: "+self.text_url)
         if self.current_line + self.page_size >= len(self.text_lines):
             self.current_line = len(self.text_lines) - self.page_size - 1

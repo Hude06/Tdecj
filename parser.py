@@ -11,7 +11,7 @@ solo_tags = ['img']
 
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
 
-block_elements = ['p','h1','h2','h3','h4','h5','div','li']
+block_elements = ['p','h1','h2','h3','h4','h5','div']
 
 MAX_TEXT = 2500_0
 class HtmlParser:
