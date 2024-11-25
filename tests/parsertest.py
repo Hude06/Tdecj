@@ -97,15 +97,12 @@ class BasicParsing(unittest.TestCase):
     #             print(chunk)
     #         self.assertEqual(len(chunks),5)
     #
-    # def test_blog_local(self):
-    #     with open("test.html", "r") as txt:
-    #         html = txt.read()
-    #         # print("opened the file", html)
-    #         parser = HtmlParser()
-    #         blocks = list(parser.parse(html))
-    #         print("chunks",blocks)
-    #         # chunks = list(filter(lambda x: len(x[1].strip())>0,chunks))
-    #         self.assertEqual(len(blocks),57)
+    def test_bigger_html_local(self):
+        with open("test.html", "r") as txt:
+            html = txt.read()
+            blocks = list(HtmlParser().parse(html))
+            print("blocks",blocks)
+            self.assertEqual(len(blocks),3)
 
     # def test_blog_remote(self):
     #     text_url = "https://joshondesign.com/2023/07/25/circuitpython-watch"

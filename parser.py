@@ -42,6 +42,7 @@ class HtmlParser:
 
                 print("ending elem",elem)
                 if elem[0] in block_elements:
+                    print("yielding block",elem)
                     yield elem
                 else:
                     print("appending to parent")
@@ -72,19 +73,17 @@ class HtmlParser:
             self.span += ch
             self.n += 1
             # dprint('run:-', self.run,"-")
-        # print("done")
+        print("done")
 
         # any remaining text
         # if self.span != "":
         block = ['block']
+        print("span is", self.span, len(self.span))
         self.append_span(block)
         # block = ['block', self.make_span(self.span)]
+        print("final block is",block)
         if len(block) > 1:
             yield block
-        # block = ['block', self.make_span(self.span)]
-        # yield block
-        # self.save_run()
-        # return self.spans
 
     def start_elem(self, text):
         end_index = text.find(">", self.n + 1)
@@ -170,7 +169,7 @@ class HtmlParser:
         return atts
 
     def append_span(self, block):
-        if self.span == "":
+        if self.span.strip() == "":
             return
         block.append(self.make_span(self.span))
 
