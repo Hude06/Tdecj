@@ -9,6 +9,7 @@ def dprint(*args, **kwargs):
 paraTags = ["h1","h2","h3","h4","p","li","td"]
 solo_tags = ['img']
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
+block_elements = ['p','h1']
 
 MAX_TEXT = 2500_0
 class HtmlParser:
@@ -39,12 +40,15 @@ class HtmlParser:
                 elem.append(self.make_span(self.span))
                 self.span = ""
 
-                # print("ending elem",elem)
-                if elem[0] == 'p':
+                print("ending elem",elem)
+                if elem[0] in block_elements:
                     yield elem
                 else:
-                    # print("appending to parent")
-                    self.elems[-1].append(elem)
+                    print("appending to parent")
+                    if len(self.elems) > 0:
+                        self.elems[-1].append(elem)
+                    else:
+                        print("no parent to append to!",elem)
                 self.n = end_index + 1
                 continue
 
@@ -53,9 +57,8 @@ class HtmlParser:
                 parent = ['block']
                 if len(self.elems) > 0:
                     parent = self.elems[-1]
-                # print("adding spans to parent",self.span)
-                if self.span != "":
-                    parent.append(self.make_span(self.span))
+                print("adding spans to parent",self.span)
+                self.append_span(parent)
                 if parent[0] == 'block' and len(parent) > 1:
                     yield parent
                 self.span = ""
@@ -93,7 +96,7 @@ class HtmlParser:
         print(f"start elem '{name}'",atts)
         self.n = end_index+1
         self.span = ""
-        return [name,atts,[]]
+        return [name,atts]
 
     # def slurp_tag(self, text, n):
     #     self.save_run()

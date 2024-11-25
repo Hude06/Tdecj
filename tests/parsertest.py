@@ -48,9 +48,8 @@ class BasicParsing(unittest.TestCase):
         self.assertEqual(
             [
                 ['p', {},
-                    [],
                     ['text', 'before'],
-                    ['b',{},[],['text', 'middle']],
+                    ['b',{},['text', 'middle']],
                     ['text', 'after']
                 ],
             ],
@@ -61,7 +60,6 @@ class BasicParsing(unittest.TestCase):
             [
                 ['block',['text','cool text']],
                 ['p', {},
-                    [],
                     ['text', 'text']
                 ],
                 ['block',['text','after text']]
@@ -70,6 +68,23 @@ class BasicParsing(unittest.TestCase):
         )
 
 
+    def test_complex_text(self):
+        self.assertEqual(
+            [
+                ['h1',{}, ['text', 'HTML Test']],
+                ['p', {},
+                 ['text', 'One of my original']
+                ],
+            ],
+            list(HtmlParser().parse('<html>'
+                                    '<body>'
+                                    '<h1>HTML Test</h1>'
+                                    '<p>'
+                                    'One of my original'
+                                    '</p>'
+                                    '</body>'
+                                    '</html>')),
+        )
 
     # def test_live(self):
     #     with open("test.html", "r") as txt:
@@ -83,14 +98,15 @@ class BasicParsing(unittest.TestCase):
     #         self.assertEqual(len(chunks),5)
     #
     # def test_blog_local(self):
-    #     with open("blog.html", "r") as txt:
+    #     with open("test.html", "r") as txt:
     #         html = txt.read()
     #         # print("opened the file", html)
     #         parser = HtmlParser()
-    #         chunks = list(parser.parse(html))
+    #         blocks = list(parser.parse(html))
+    #         print("chunks",blocks)
     #         # chunks = list(filter(lambda x: len(x[1].strip())>0,chunks))
-    #         self.assertEqual(len(chunks),57)
-    #
+    #         self.assertEqual(len(blocks),57)
+
     # def test_blog_remote(self):
     #     text_url = "https://joshondesign.com/2023/07/25/circuitpython-watch"
     #     with requests.get(text_url) as response:
