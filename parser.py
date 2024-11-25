@@ -15,13 +15,11 @@ class HtmlParser:
     def __init__(self):
         self.elems = []
         self.span = ""
-        # self.spans = []
         self.n = 0
 
     def parse(self, text):
         print("processing text",text[0:MAX_TEXT])
         self.n = 0
-        # self.spans = []
         self.elems = []
         self.span = ""
 
@@ -32,28 +30,21 @@ class HtmlParser:
             # end element
             if text[self.n:self.n+len("</")] == "</":
                 dprint("ending element")
-                # print(self.elems)
-                # print("spans",self.span, self.spans)
                 end_index = text.find(">", self.n + 1)
                 name = text[self.n + 2:end_index]
                 dprint("end tag name", name)
                 elem = self.elems.pop()
-                print("ending elem",elem)
+                # print("ending elem",elem)
 
-                # self.spans.append(['text',self.span])
-                elem.append(['text',self.span])
-                # self.spans = []
+                elem.append(self.make_span(self.span))
                 self.span = ""
 
-                print("ending elem",elem)
+                # print("ending elem",elem)
                 if elem[0] == 'p':
                     yield elem
                 else:
-                    print("appending to parent")
+                    # print("appending to parent")
                     self.elems[-1].append(elem)
-                    # parent = self.elems.pop()
-                    # parent.append(elem)
-                    # self.elems.append(parent)
                 self.n = end_index + 1
                 continue
 
@@ -62,24 +53,33 @@ class HtmlParser:
                 parent = ['block']
                 if len(self.elems) > 0:
                     parent = self.elems[-1]
-                print("adding spans to parent",self.span)
-                parent.append(['text',self.span])
-                if parent[0] == 'block':
+                # print("adding spans to parent",self.span)
+                if self.span != "":
+                    parent.append(self.make_span(self.span))
+                if parent[0] == 'block' and len(parent) > 1:
                     yield parent
-                # self.spans = []
                 self.span = ""
                 elem = self.start_elem(text)
                 self.elems.append(elem)
                 continue
 
+            # skip newlines
             # if ch == '\n':
             #     ch = ""
             self.span += ch
             self.n += 1
             # dprint('run:-', self.run,"-")
-        print("done")
-        block = ['block',['text',self.span]]
-        yield block
+        # print("done")
+
+        # any remaining text
+        # if self.span != "":
+        block = ['block']
+        self.append_span(block)
+        # block = ['block', self.make_span(self.span)]
+        if len(block) > 1:
+            yield block
+        # block = ['block', self.make_span(self.span)]
+        # yield block
         # self.save_run()
         # return self.spans
 
@@ -142,12 +142,11 @@ class HtmlParser:
     #             name = self.elems[-1][0]
     #         self.append_content(name,txt)
 
-    # def append_content(self, name, content, attrs=None):
-    #     # print("appending",content)
-    #     content = re.sub(r"&amp;", '&', content)
-    #     content = re.sub(r"&#x27;", "'", content)
-    #     self.spans.append([name, content, attrs])
-    #     self.span = ""
+    def make_span(self, content):
+        content = content.strip()
+        content = re.sub(r"&amp;", '&', content)
+        content = re.sub(r"&#x27;", "'", content)
+        return ['text',content]
 
     def parse_attributes(self, attrs_str):
         # print(f"pushing tag '{name}':'{attrs_str}'")
@@ -166,6 +165,12 @@ class HtmlParser:
                         value = value[1:-1]
                     atts[pair[0]] = value
         return atts
+
+    def append_span(self, block):
+        if self.span == "":
+            return
+        block.append(self.make_span(self.span))
+
 
 def process_html(html):
     parser = HtmlParser()

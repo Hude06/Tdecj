@@ -47,26 +47,24 @@ class BasicParsing(unittest.TestCase):
     def test_para_with_styles(self):
         self.assertEqual(
             [
-                ['block',['text','']],
                 ['p', {},
                     [],
-                    ['text', ' before '],
+                    ['text', 'before'],
                     ['b',{},[],['text', 'middle']],
-                    ['text', ' after ']
+                    ['text', 'after']
                 ],
-                ['block',['text','']]
             ],
             list(HtmlParser().parse('<p> before <b>middle</b> after </p>')),
         )
     def test_extra_text(self):
         self.assertEqual(
             [
-                ['block',['text','cool text ']],
+                ['block',['text','cool text']],
                 ['p', {},
                     [],
                     ['text', 'text']
                 ],
-                ['block',['text',' after text']]
+                ['block',['text','after text']]
             ],
             list(HtmlParser().parse('cool text <p>text</p> after text')),
         )
