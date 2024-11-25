@@ -86,5 +86,59 @@ the finishing text
 
 
 
-## line breaker takes in chunks
+## Line Breaker algorithm
+
+The line breaker takes in the list of blocks and outputs a list of lines, where is
+line is composed of one or more runs. Larger blocks will be split into multiple lines.
+While most lines have only a single run, some have multiple to account for inline links.
+
+
+```python
+[
+  ['p', {}, ['text', 'some plain text']],
+  # becomes
+  [
+    ['line',['plain','some plain text']]
+  ],
+
+
+  ['p', {}, ['text', 'some very long text that will have to wrap after a while']], 
+  # becomes
+  [
+    ['line',['plain','some very long text that will']],
+    ['line',['plain','have to wrap after a while']],
+  ],
+
+  ['p', {}, 
+    ['text', 'before'],
+    ['a',{'href':'url'}, ['text','link text']]
+    ['text', 'after'],
+  ],
+  # becomes
+  [
+    ['line',
+        ['plain','before'],
+        ['link','link text',{'href','url'}],
+        ['plain','after']
+     ]
+  ]
+]
+```
+
+The line breaker also detects header element types to set the line type
+as 'header' and inserts blank lines between paragraphs.
+
+```python
+[
+    ['h1',{},'my header']
+    # becomes
+  [
+      ['header',
+       ['my header']
+      ]
+  ]     
+]
+```
+
+
 

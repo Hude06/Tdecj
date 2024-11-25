@@ -44,7 +44,7 @@ class HtmlParser:
 
                 # print("ending elem",elem)
                 if elem[0] in block_elements:
-                    print("yielding block",elem)
+                    # print("yielding block",elem)
                     yield elem
                 else:
                     # print("appending to parent")
@@ -54,7 +54,7 @@ class HtmlParser:
                         else:
                             print("no parent to append to!",elem)
                     else:
-                        print("ignoring element",elem[0])
+                        dprint("ignoring element",elem[0])
                 self.n = end_index + 1
                 continue
 
@@ -78,7 +78,7 @@ class HtmlParser:
             self.span += ch
             self.n += 1
             # dprint('run:-', self.run,"-")
-        print("done")
+        # print("done")
 
         # any remaining text
         # if self.span != "":
