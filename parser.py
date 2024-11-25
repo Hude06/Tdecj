@@ -1,15 +1,17 @@
 import re
 import sys
 
-DEBUG = True
+DEBUG = False
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
 
 paraTags = ["h1","h2","h3","h4","p","li","td"]
 solo_tags = ['img']
+
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
-block_elements = ['p','h1']
+
+block_elements = ['p','h1','h2','h3','h4','h5','div','li']
 
 MAX_TEXT = 2500_0
 class HtmlParser:
@@ -19,7 +21,7 @@ class HtmlParser:
         self.n = 0
 
     def parse(self, text):
-        print("processing text",text[0:MAX_TEXT])
+        # print("processing text",text[0:MAX_TEXT])
         self.n = 0
         self.elems = []
         self.span = ""
@@ -40,16 +42,19 @@ class HtmlParser:
                 elem.append(self.make_span(self.span))
                 self.span = ""
 
-                print("ending elem",elem)
+                # print("ending elem",elem)
                 if elem[0] in block_elements:
                     print("yielding block",elem)
                     yield elem
                 else:
-                    print("appending to parent")
-                    if len(self.elems) > 0:
-                        self.elems[-1].append(elem)
+                    # print("appending to parent")
+                    if elem[0] not in ignore_tags:
+                        if len(self.elems) > 0:
+                            self.elems[-1].append(elem)
+                        else:
+                            print("no parent to append to!",elem)
                     else:
-                        print("no parent to append to!",elem)
+                        print("ignoring element",elem[0])
                 self.n = end_index + 1
                 continue
 
@@ -58,7 +63,7 @@ class HtmlParser:
                 parent = ['block']
                 if len(self.elems) > 0:
                     parent = self.elems[-1]
-                print("adding spans to parent",self.span)
+                # print("adding spans to parent",self.span)
                 self.append_span(parent)
                 if parent[0] == 'block' and len(parent) > 1:
                     yield parent
@@ -78,10 +83,10 @@ class HtmlParser:
         # any remaining text
         # if self.span != "":
         block = ['block']
-        print("span is", self.span, len(self.span))
+        # print("span is", self.span, len(self.span))
         self.append_span(block)
         # block = ['block', self.make_span(self.span)]
-        print("final block is",block)
+        # print("final block is",block)
         if len(block) > 1:
             yield block
 
@@ -89,10 +94,10 @@ class HtmlParser:
         end_index = text.find(">", self.n + 1)
         # space_index = text.find(' ', self.n + 1, end_index)
         name = text[self.n + 1:end_index]
-        print("name",name)
+        # print("name",name)
         attrs_str = text[self.n + 1 + len(name):end_index]
         atts = self.parse_attributes(attrs_str)
-        print(f"start elem '{name}'",atts)
+        # print(f"start elem '{name}'",atts)
         self.n = end_index+1
         self.span = ""
         return [name,atts]

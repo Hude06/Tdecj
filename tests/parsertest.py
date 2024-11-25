@@ -104,6 +104,20 @@ class BasicParsing(unittest.TestCase):
             print("blocks",blocks)
             self.assertEqual(len(blocks),3)
 
+    def test_blog_local(self):
+        with open("blog.html", "r") as txt:
+            html = txt.read()
+            blocks = list(HtmlParser().parse(html))
+            print("blocks==========")
+            for block in blocks:
+                print(block)
+            self.assertEqual(len(blocks),23)
+            self.assertEqual(blocks[0][0],'h1')
+            self.assertEqual(blocks[1][0],'li')
+
+            self.assertEqual(blocks[20][0],'p')
+            self.assertEqual(blocks[20][2][1],'Posted July 25th, 2023')
+
     # def test_blog_remote(self):
     #     text_url = "https://joshondesign.com/2023/07/25/circuitpython-watch"
     #     with requests.get(text_url) as response:
