@@ -7,16 +7,15 @@ from line_breaker import LineBreaker
 import displayio
 
 COLCOUNT = 30
-ROWCOUNT = 10
 
 
-DEBUG = False
+DEBUG = True
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
 
 class Browser:
-    def __init__(self, wifi_params, display):
+    def __init__(self, wifi_params, display, cols=30, page_size=10):
         self.term = PagingTerminal(display)
         self.parser = HtmlParser()
         self.text_lines = []
@@ -28,6 +27,9 @@ class Browser:
         self.selected_link_index = 0
         self.links = []
         self.display = display
+        self.current_line = -1
+        self.page_size = page_size
+        self.cols = cols
         dprint("init browser")
 
     def to_str(self, line):
@@ -82,16 +84,16 @@ class Browser:
         for chunk in self.parser.parse(html):
             dprint("got a chunk",chunk)
             count += 1
-            if count > 30:
+            if count > 500:
                 dprint("done with chunks")
                 break
-            for line in lb.wrap_text([chunk],30):
-                dprint("line is",line[0])
+            for line in lb.wrap_text([chunk],self.cols):
+                # dprint("line is",line[0])
                 self.output_lines.append(line[0])
-                # print('redrawing')
-                self.redraw_text()
-                self.display.refresh()
-                time.sleep(0.5)
+            # print('redrawing')
+            self.redraw_text()
+            self.display.refresh()
+            time.sleep(0.01)
         # # track all links
         # for line in self.output_lines:
         #     if len(line) > 0:
@@ -105,17 +107,22 @@ class Browser:
     def redraw_text(self):
         self.text_lines.clear()
         for line in self.output_lines:
-            dprint('converting line', line)
+            # dprint('converting line', line)
             if len(line) > 0:
                 self.text_lines.append(self.to_str(line))
         self.term.render_row(0, "loaded: "+self.text_url)
-        for i in range(0,10):
-            if i >= len(self.text_lines):
-                continue
-            line = self.text_lines[i]
-            dprint("line",line)
-            self.term.render_row(i+1,line)
-        self.term.render_row(17, "j = next link, k = prev link, g = load link")
+        if self.current_line + self.page_size >= len(self.text_lines):
+            self.current_line = len(self.text_lines) - self.page_size - 1
+        if self.current_line < 0:
+            self.current_line = 0
+        # dprint("doing", self.current_line, 'to ', self.current_line+self.page_size)
+        for i in range(0, self.page_size):
+            line = ""
+            if not self.current_line + i > len(self.text_lines)-1:
+                line = self.text_lines[self.current_line+i]
+            # dprint("line",line)
+            self.term.render_row(i+2,line)
+        self.term.render_row(self.page_size+3, f"links j = next, k=prev, g=load, lines={len(self.output_lines)}")
 
     def nav_next_link(self):
         self.selected_link_index += 1
@@ -135,7 +142,8 @@ class Browser:
         self.load_url(link[2]['href'])
 
     def page_down(self):
-        dprint("pretending to page down")
+        self.current_line += self.page_size
+        self.redraw_text()
 
 
 class PagingTerminal:
