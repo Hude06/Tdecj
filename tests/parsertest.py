@@ -85,6 +85,14 @@ class BasicParsing(unittest.TestCase):
                                     '</body>'
                                     '</html>')),
         )
+        self.assertEqual(
+            [
+                ['p', {},
+                    ['text', 'One of my original IdealOS front page'],
+                ],
+            ],
+            list(HtmlParser().parse('<p>One of my original IdealOS\n     front page</p>')),
+        )
 
     # def test_live(self):
     #     with open("test.html", "r") as txt:
@@ -102,6 +110,13 @@ class BasicParsing(unittest.TestCase):
             html = txt.read()
             blocks = list(HtmlParser().parse(html))
             print("blocks",blocks)
+            self.assertEqual(len(blocks),3)
+
+    def test_strip_whitespace(self):
+        with open("test.html", "r") as txt:
+            html = txt.read()
+            blocks = list(HtmlParser().parse(html))
+            # print("blocks",blocks)
             self.assertEqual(len(blocks),3)
 
     def test_blog_local(self):

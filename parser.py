@@ -12,6 +12,7 @@ solo_tags = ['img']
 ignore_tags = ['meta','link', "!DOCTYPE",'script','title','head','html','body']
 
 block_elements = ['p','h1','h2','h3','h4','h5','div','li']
+whitespace = [' ','\n']
 
 MAX_TEXT = 2500_0
 class HtmlParser:
@@ -73,20 +74,18 @@ class HtmlParser:
                 continue
 
             # skip newlines
-            # if ch == '\n':
-            #     ch = ""
+            if ch == '\n':
+                ch = ""
+
+            # collapse whitespace
+            if ch in whitespace and len(self.span) > 0 and self.span[-1] in whitespace:
+                ch = ""
             self.span += ch
             self.n += 1
-            # dprint('run:-', self.run,"-")
-        # print("done")
 
         # any remaining text
-        # if self.span != "":
         block = ['block']
-        # print("span is", self.span, len(self.span))
         self.append_span(block)
-        # block = ['block', self.make_span(self.span)]
-        # print("final block is",block)
         if len(block) > 1:
             yield block
 
