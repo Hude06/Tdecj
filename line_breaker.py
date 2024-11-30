@@ -18,7 +18,7 @@ def remap_name(name):
     if name == 'p':
         return 'plain'
     if name == 'li':
-        return 'plain'
+        return 'listitem'
     return name
 
 class LineBreaker:

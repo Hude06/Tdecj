@@ -63,6 +63,8 @@ class Browser:
             return ""
         if type == "header":
             ln += "## "
+        if type == 'listitem':
+            ln += "* "
         for span in line[1:]:
             # print("span_",span)
             if span[0] == 'link':
@@ -71,9 +73,9 @@ class Browser:
                 # print("links",self.links)
                 if self.get_selected_link() == span:
                         # print("found the link")
-                        ln = ln + "**"+span[1][1]+"**"
+                        ln = ln + "[*"+span[1][1]+"*]"
                 else:
-                    ln = ln + "_"+span[1][1]+"_"
+                    ln = ln + "["+span[1][1]+"]"
             else:
                 ln = ln + span[1]
 
@@ -126,11 +128,11 @@ class Browser:
         dprint("done with chunks")
         # track all links
         for line in self.output_lines:
-            print("final line is",line)
+            dprint("final line is",line)
             if len(line) > 0:
                 for span in line:
                     if span[0] == "link":
-                        print('we need to track this link',span)
+                        dprint('we need to track this link',span)
                         self.links.append(span)
         self.redraw_text()
         self.display.refresh()
