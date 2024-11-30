@@ -34,6 +34,10 @@ class LineBreaker:
             line = [name]
             for span in chunk[2:]:
                 # print(f"span type:{span[0]}")
+                if span[0] == 'a':
+                    text = span[2]
+                    # print(f"appending text: '{text}'")
+                    line.append(['link',['plain',text[1]],span[1]])
                 if span[0] == 'text':
                     text = span[1]
                     # print(f"appending text: '{text}'")

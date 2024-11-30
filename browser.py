@@ -9,29 +9,47 @@ import displayio
 COLCOUNT = 30
 
 
-DEBUG = True
+DEBUG = False
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
 
 class Browser:
     def __init__(self, wifi_params, display, cols=30, page_size=10):
-        self.term = PagingTerminal(display)
-        self.overlay = PagingTerminal(display)
+        plain_palette = displayio.Palette(2)
+        plain_palette[0] = 0x000000
+        plain_palette[1] = 0x44FF44
+        # plain_palette.make_transparent(0)
+
+        overlay_palette = displayio.Palette(2)
+        overlay_palette[0] = 0x000000
+        overlay_palette[1] = 0x4444FF
+        overlay_palette.make_transparent(0)
+
+        self.term = PagingTerminal(display, plain_palette)
+        self.overlay = PagingTerminal(display, overlay_palette)
         self.parser = HtmlParser()
         self.text_lines = []
         self.output_lines = []
         self.splash = displayio.Group()
         self.splash.append(self.term.grid)
+        self.splash.append(self.overlay.grid)
         self.wifi_params = wifi_params
         self.text_url = ""
-        self.selected_link_index = 0
+        self.selected_link_index = -1
         self.links = []
         self.display = display
         self.current_line = -1
         self.page_size = page_size
         self.cols = cols
         dprint("init browser")
+
+    def get_selected_link(self):
+        if self.selected_link_index < 0:
+            return None
+        if len(self.links) < 1:
+            return None
+        return self.links[self.selected_link_index]
 
     def to_str(self, line):
         dprint("to_str", line)
@@ -46,15 +64,19 @@ class Browser:
         if type == "header":
             ln += "## "
         for span in line[1:]:
-            ln = ln + span[1]
+            # print("span_",span)
+            if span[0] == 'link':
+                # print('doing a link')
+                # print('selected',self.get_selected_link())
+                # print("links",self.links)
+                if self.get_selected_link() == span:
+                        # print("found the link")
+                        ln = ln + "**"+span[1][1]+"**"
+                else:
+                    ln = ln + "_"+span[1][1]+"_"
+            else:
+                ln = ln + span[1]
 
-        # if span[1] == "link":
-        #     if self.selected_link_index >= 0:
-        #         if span == self.links[self.selected_link_index]:
-        #             print("this is the selected link")
-        #             ln += " **" + span[0] + "**"
-        #             continue
-        # ln += line[0]
         return ln
 
     def load_url(self, url):
@@ -107,7 +129,7 @@ class Browser:
             print("final line is",line)
             if len(line) > 0:
                 for span in line:
-                    if span[1] == "link":
+                    if span[0] == "link":
                         print('we need to track this link',span)
                         self.links.append(span)
         self.redraw_text()
@@ -147,8 +169,12 @@ class Browser:
         self.redraw_text()
 
     def load_selected_link(self):
-        link = self.links[self.selected_link_index]
-        self.load_url(link[2]['href'])
+        if self.get_selected_link() is not None:
+            url = self.get_selected_link()[2]['href']
+            if url.startswith("http"):
+                self.load_url(url)
+            else:
+                self.load_file(url)
 
     def page_down(self):
         self.current_line += self.page_size
@@ -156,15 +182,13 @@ class Browser:
 
 
 class PagingTerminal:
-    def __init__(self, display):
+    def __init__(self, display, palette):
         # self.rows = []
         self.display = display
         self.current_row = 0
         self.font = terminalio.FONT
         font_w, font_h = terminalio.FONT.get_bounding_box()
-        plain_palette = displayio.Palette(2)
-        plain_palette[0] = 0x000000
-        plain_palette[1] = 0x33FF33
+        plain_palette = palette
 
         self.grid = displayio.TileGrid(
             terminalio.FONT.bitmap,

@@ -42,7 +42,7 @@ if WIFI_ENABLED:
 browser = Browser(wifi_params, display, cols=40, page_size=16)
 display.root_group = browser.splash
 # browser.load_url("https://joshondesign.com/2023/07/25/circuitpython-watch")
-browser.load_file("blog.html")
+browser.load_file("links.html")
 
 # handle input events
 while True:
