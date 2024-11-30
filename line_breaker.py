@@ -1,6 +1,6 @@
 import sys
 
-DEBUG = True
+DEBUG = False
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)

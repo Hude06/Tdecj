@@ -9,7 +9,7 @@ import displayio
 COLCOUNT = 30
 
 
-DEBUG = False
+DEBUG = True
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, file=sys.stderr, **kwargs)
@@ -17,6 +17,7 @@ def dprint(*args, **kwargs):
 class Browser:
     def __init__(self, wifi_params, display, cols=30, page_size=10):
         self.term = PagingTerminal(display)
+        self.overlay = PagingTerminal(display)
         self.parser = HtmlParser()
         self.text_lines = []
         self.output_lines = []
@@ -58,7 +59,8 @@ class Browser:
 
     def load_url(self, url):
         self.term.clear()
-        self.term.render_row(0, "loading: " + url)
+        self.overlay.clear()
+        self.overlay.render_row(0, "loading: " + url)
         time.sleep(0.1)
         self.text_url = url
         try:
@@ -69,19 +71,19 @@ class Browser:
                 self.render_html(response.text)
         except OSError as e:
             dprint("Failed to load", url)
-            self.term.render_row(0, "Failed to load: " + url)
+            self.overlay.render_row(0, "Failed to load: " + url)
             return
 
     def load_file(self, filename):
-        self.term.clear()
-        self.term.render_row(0, "loading: " + filename)
+        self.overlay.clear()
+        self.overlay.render_row(0, "loading: " + filename)
         self.text_url = filename
         try:
             with open(filename, "r") as txt:
                 self.render_html(txt.read())
         except OSError as e:
             dprint("Failed to load", filename)
-            self.term.render_row(0, "Failed to load: " + filename)
+            self.overlay.render_row(0, "Failed to load: " + filename)
 
     def render_html(self, html):
         dprint("rendering", len(html), "bytes")
@@ -96,26 +98,27 @@ class Browser:
             for line in lb.wrap_text2([chunk],self.cols):
                 dprint("line is",line)
                 self.output_lines.append(line)
-            # print('redrawing')
             self.redraw_text()
             self.display.refresh()
             time.sleep(0)
         dprint("done with chunks")
-        # # track all links
-        # for line in self.output_lines:
-        #     if len(line) > 0:
-        #         for span in line:
-        #             if span[1] == "link":
-        #                 print('we need to track this link',span)
-        #                 self.links.append(span)
-        # self.redraw_text()
+        # track all links
+        for line in self.output_lines:
+            print("final line is",line)
+            if len(line) > 0:
+                for span in line:
+                    if span[1] == "link":
+                        print('we need to track this link',span)
+                        self.links.append(span)
+        self.redraw_text()
+        self.display.refresh()
 
     # convert lines and spans to rows of plain text for the pager
     def redraw_text(self):
         self.text_lines.clear()
         for line in self.output_lines:
             self.text_lines.append(self.to_str(line))
-        self.term.render_row(0, "loaded: "+self.text_url)
+        self.overlay.render_row(0, "loaded: "+self.text_url)
         if self.current_line + self.page_size >= len(self.text_lines):
             self.current_line = len(self.text_lines) - self.page_size - 1
         if self.current_line < 0:
@@ -127,7 +130,7 @@ class Browser:
                 line = self.text_lines[self.current_line+i]
             # dprint("line",line)
             self.term.render_row(i+2,line)
-        self.term.render_row(self.page_size+3, f"links j = next, k=prev, g=load, lines={len(self.output_lines)}")
+        self.overlay.render_row(self.page_size+3, f"links j = next, k=prev, g=load, lines={len(self.output_lines)}")
 
     def nav_next_link(self):
         self.selected_link_index += 1
@@ -141,6 +144,7 @@ class Browser:
         if self.selected_link_index < 0:
             self.selected_link_index = len(self.links) - 1
         dprint("nav prev link", self.links[self.selected_link_index])
+        self.redraw_text()
 
     def load_selected_link(self):
         link = self.links[self.selected_link_index]

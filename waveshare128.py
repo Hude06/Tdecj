@@ -3,10 +3,10 @@ import displayio
 import analogio
 import busio
 import gc9a01
-
+import time
 
 def setup_display(speed=100_000_000):
-    # setup the display
+    # set up the display
     displayio.release_displays()
     spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
     # LCD_RST is 12 in the regular, but 13 for the touch version

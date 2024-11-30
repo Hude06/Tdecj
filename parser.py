@@ -93,12 +93,15 @@ class HtmlParser:
 
     def start_elem(self, text):
         end_index = text.find(">", self.n + 1)
-        # space_index = text.find(' ', self.n + 1, end_index)
+        space_index = text.find(' ', self.n + 1, end_index)
+        print("space index",self.n, end_index, space_index)
         name = text[self.n + 1:end_index]
-        # print("name",name)
+        if space_index >= 0:
+            name = text[self.n + 1:space_index]
+        print("name",name)
         attrs_str = text[self.n + 1 + len(name):end_index]
         atts = self.parse_attributes(attrs_str)
-        # print(f"start elem '{name}'",atts)
+        print(f"start elem '{name}'",atts)
         self.n = end_index+1
         self.span = ""
         return [name,atts]

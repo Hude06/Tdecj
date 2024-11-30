@@ -1,13 +1,11 @@
 import time
 
 from browser import Browser
-from parser import HtmlParser
 
 import adafruit_connection_manager
 import adafruit_requests
 import board
 import displayio
-import terminalio
 
 # from waveshare128 import setup_display
 

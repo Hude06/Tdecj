@@ -23,6 +23,8 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
   https://circuitpython.org/downloads
 """
+from __future__ import annotations
+
 import sys
 import board
 import analogio

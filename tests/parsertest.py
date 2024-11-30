@@ -1,6 +1,6 @@
 import unittest
 from parser import HtmlParser
-import requests
+
 
 
 class BasicParsing(unittest.TestCase):
@@ -32,14 +32,15 @@ class BasicParsing(unittest.TestCase):
     #     self.simple_element('<a href="foo">foo &#x27; bar</a>  ', "a", "foo ' bar")
 
 
-    # def test_link(self):
-    #     parser = HtmlParser()
-    #     chunks = list(parser.parse('<a href="https://google.com/">link to google</a>'))
-    #     print(chunks)
-    #     self.assertEqual(chunks[0][0], "a")
-    #     self.assertEqual(chunks[0][1], "link to google")
-    #     self.assertEqual(chunks[0][2]['href'], "https://google.com/")
-    #
+    def test_link(self):
+        self.assertEqual(
+            [
+                ['p',{},['a',{'href':'https://google.com/'},['text','a link to google']]]
+            ],
+            list(HtmlParser().parse(
+            '<p><a href="https://google.com/">a link to google</a></p>')),
+        )
+
     def test_plain_text(self):
         self.assertEqual(list(HtmlParser().parse('middle')), [
             ['block',['text','middle']]
@@ -66,8 +67,6 @@ class BasicParsing(unittest.TestCase):
             ],
             list(HtmlParser().parse('cool text <p>text</p> after text')),
         )
-
-
     def test_complex_text(self):
         self.assertEqual(
             [
@@ -111,14 +110,12 @@ class BasicParsing(unittest.TestCase):
             blocks = list(HtmlParser().parse(html))
             print("blocks",blocks)
             self.assertEqual(len(blocks),3)
-
     def test_strip_whitespace(self):
         with open("test.html", "r") as txt:
             html = txt.read()
             blocks = list(HtmlParser().parse(html))
             # print("blocks",blocks)
             self.assertEqual(len(blocks),3)
-
     def test_blog_local(self):
         with open("blog.html", "r") as txt:
             html = txt.read()
@@ -126,12 +123,12 @@ class BasicParsing(unittest.TestCase):
             print("blocks==========")
             for block in blocks:
                 print(block)
-            self.assertEqual(len(blocks),23)
+            self.assertEqual(len(blocks),29)
             self.assertEqual(blocks[0][0],'h1')
             self.assertEqual(blocks[1][0],'li')
 
-            self.assertEqual(blocks[20][0],'p')
-            self.assertEqual(blocks[20][2][1],'Posted July 25th, 2023')
+            self.assertEqual(blocks[22][0],'p')
+            self.assertEqual(blocks[22][2][1],'Posted July 25th, 2023')
 
     # def test_blog_remote(self):
     #     text_url = "https://joshondesign.com/2023/07/25/circuitpython-watch"
