@@ -65,13 +65,15 @@ class LineWrappingTests(unittest.TestCase):
 
     def test_link_wrapping(self):
         chunks = [
-            ['p',{},['a',{'href','links.html'},['text','this page']]]
+            ['p',{},['a',{'href':'links.html'},['text','this page']]]
         ]
         lines = list(LineBreaker().wrap_text2(chunks, 30))
         # print("==== lines ====")
         # for line in lines:
             # print(line)
             # print_line(line)
+        self.assertEqual(2,len(lines))
+        self.assertEqual(lines[0],['plain',['link',['plain','this page'],{'href':'links.html'}]])
 
     def test_blog_wrapping(self):
         with open("blog.html", "r") as txt:
