@@ -2,3 +2,4 @@ time
 sys
 wifi
 vectorio
+adafruit_requests

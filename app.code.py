@@ -7,9 +7,11 @@ import displayio
 import microcontroller
 import wifi
 
+from browser import Browser
 from helper import TDeck
 from popupmenu import PopupMenu
 import adafruit_connection_manager
+import adafruit_requests
 import vectorio
 
 
@@ -110,9 +112,28 @@ def config_network(layout):
     ]
     push_menu(PopupMenu(network_menu))
 
+browser = None
+def start_browser(info):
+    print("starting the browser")
+    global browser
+    wifi_params = {
+        "pool": adafruit_connection_manager.get_radio_socketpool(wifi.radio),
+        "ssl_context": adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
+        "requests": adafruit_requests.Session(
+            adafruit_connection_manager.get_radio_socketpool(wifi.radio),
+            adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
+        ),
+        "ssid": "JEFF22",  # You can change this to "JEFF22" if needed
+        "password": "Jefferson2022",
+    }
+    browser = Browser(wifi_params, display, cols=40, page_size=16)
+    display.root_group.append(browser.splash)
+    browser.load_file("content/links.html")
+
 main_menu = [
     ["Info       ", show_info],
-    ["Network    ", config_network]
+    ["Network    ", config_network],
+    ["Browse the web", start_browser]
 ]
 
 bg_palette = displayio.Palette(1)
@@ -123,7 +144,32 @@ display.root_group.append(bg_rect)
 
 push_menu(PopupMenu(main_menu))
 
+def update_browser_nav():
+    keypress = tdeck.get_keypress()
+    if keypress:
+        print("keypressss-", keypress, "-")
+        if keypress == ' ':
+            browser.page_down()
+        if keypress == 'j':
+            browser.nav_next_link()
+        if keypress == 'k':
+            browser.nav_prev_link()
+        if keypress == 'g':
+            browser.load_selected_link()
+    for p, c in tdeck.get_trackball():
+        if c > 0:
+            if p == "right":
+                browser.nav_next_link()
+            if p == "down":
+                browser.nav_next_link()
+            if p == "left":
+                browser.nav_prev_link()
+            if p == "up":
+                browser.nav_prev_link()
+
 while True:
     time.sleep(0.01)
+    if browser:
+        update_browser_nav()
     update_menu()
 
