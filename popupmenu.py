@@ -8,7 +8,6 @@ class PopupMenu:
         self.items = items
         self.selected = 0
         count = len(items)
-        print(f"{count} menu items")
         self.selected_color = 0xFFFFFF
         self.layout = GridLayout(
             x=10,
@@ -39,7 +38,8 @@ class PopupMenu:
     def perform_selected_item(self):
         # print("doing selected item",self.selected,self.items)
         item = self.items[self.selected]
-        item[1](item)
+        if len(item) > 1:
+            item[1](item)
 
     def select_prev_item(self):
         self.layout.get_cell((0, self.selected)).background_color = 0xFFFFFF

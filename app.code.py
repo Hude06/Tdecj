@@ -33,6 +33,7 @@ def pop_menu(layout):
     display.root_group.remove(pop.layout)
 def noop(layout):
     print("doing nothing")
+
 def update_menu():
     popup = menus[-1]
 
@@ -55,31 +56,14 @@ def update_menu():
             if p == "up":
                 popup.select_prev_item()
 
-
-
-# init highlighter
-# wifi_params = {
-#     "pool": adafruit_connection_manager.get_radio_socketpool(wifi.radio),
-#     "ssl_context": adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
-#     "requests": adafruit_requests.Session(
-#         adafruit_connection_manager.get_radio_socketpool(wifi.radio),
-#         adafruit_connection_manager.get_radio_ssl_context(wifi.radio),
-#     ),
-#     "ssid": "JEFF22",  # You can change this to "JEFF22" if needed
-#     "password": "Jefferson2022",
-# }
-
-
-
-
-
 def show_info(layout):
     info_menu = [
-        [f"used mem: {gc.mem_alloc()/1024}k",noop],
-        [f"free mem: {gc.mem_free()/1024}k",noop],
-        [f"cpu temp: {microcontroller.cpu.temperature}C"],
-        [f"cpu freq: {microcontroller.cpu.frequency/(1*1000*1000)}mhz"],
-        ["back",pop_menu],
+        [f"  used mem: {gc.mem_alloc()/1024}k"],
+        [f"  free mem: {gc.mem_free()/1024}k"],
+        [f"  cpu temp: {microcontroller.cpu.temperature}C"],
+        [f"  cpu freq: {microcontroller.cpu.frequency/(1*1000*1000)}mhz"],
+        [f"  Battery Voltage: {tdeck.get_battery_voltage():.2f} V"],
+        [ "< Back",pop_menu],
     ]
     push_menu(PopupMenu(info_menu))
 
@@ -91,8 +75,8 @@ def show_status(layout):
         [f"hostname enabled = {wifi.radio.hostname}",noop],
     ]
     if wifi.radio.connected:
-        info.append([f"ssid {wifi.radio.ap_info.ssid}",noop])
-    info.append(["< back", pop_menu])
+        info.append([f"  ssid {wifi.radio.ap_info.ssid}",noop])
+    info.append(["< Back", pop_menu])
     push_menu(PopupMenu(info))
 
 def config_network(layout):
@@ -138,12 +122,8 @@ bg_rect = vectorio.Rectangle(pixel_shader=bg_palette,
 display.root_group.append(bg_rect)
 
 push_menu(PopupMenu(main_menu))
-# main = PopupMenu(main_menu)
-# menus.append(main)
-# display.root_group.append(main.layout)
 
 while True:
     time.sleep(0.01)
-    display.refresh()
     update_menu()
 
