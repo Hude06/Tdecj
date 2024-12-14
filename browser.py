@@ -82,8 +82,7 @@ class Browser:
         return ln
 
     def load_url(self, url):
-        self.term.clear()
-        self.overlay.clear()
+        self.reset()
         self.overlay.render_row(0, "loading: " + url)
         time.sleep(0.1)
         self.text_url = url
@@ -99,7 +98,7 @@ class Browser:
             return
 
     def load_file(self, filename):
-        self.overlay.clear()
+        self.reset()
         self.overlay.render_row(0, "loading: " + filename)
         self.text_url = filename
         try:
@@ -181,6 +180,13 @@ class Browser:
     def page_down(self):
         self.current_line += self.page_size
         self.redraw_text()
+
+    def reset(self):
+        self.term.clear()
+        self.overlay.clear()
+        self.output_lines = []
+        self.links = []
+
 
 
 class PagingTerminal:

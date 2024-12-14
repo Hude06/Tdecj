@@ -112,7 +112,7 @@ def config_network(layout):
     ]
     push_menu(PopupMenu(network_menu))
 
-browser = None
+browser:Browser = None
 def start_browser(info):
     print("starting the browser")
     global browser
@@ -126,7 +126,7 @@ def start_browser(info):
         "ssid": "JEFF22",  # You can change this to "JEFF22" if needed
         "password": "Jefferson2022",
     }
-    browser = Browser(wifi_params, display, cols=40, page_size=16)
+    browser = Browser(wifi_params, display, cols=45, page_size=15)
     display.root_group.append(browser.splash)
     browser.load_file("content/links.html")
 
@@ -147,7 +147,7 @@ push_menu(PopupMenu(main_menu))
 def update_browser_nav():
     keypress = tdeck.get_keypress()
     if keypress:
-        print("keypressss-", keypress, "-")
+        # print("keypressss-", keypress, "-")
         if keypress == ' ':
             browser.page_down()
         if keypress == 'j':
@@ -156,6 +156,8 @@ def update_browser_nav():
             browser.nav_prev_link()
         if keypress == 'g':
             browser.load_selected_link()
+        if keypress == 'b':
+            browser.load_file("content/links.html")
     for p, c in tdeck.get_trackball():
         if c > 0:
             if p == "right":
