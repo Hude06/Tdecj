@@ -12,6 +12,7 @@ displayio.release_displays()
 
 # print("battery", dir(board.BATTERY))
 
+# adapted from https://gist.github.com/todbot/aa90849ddf987ae903588cdd79468dd1
 display_bus = paralleldisplaybus.ParallelBus(
     data_pins = (board.LCD_D0, board.LCD_D1, board.LCD_D2, board.LCD_D3,
                  board.LCD_D4, board.LCD_D5, board.LCD_D6, board.LCD_D7),
