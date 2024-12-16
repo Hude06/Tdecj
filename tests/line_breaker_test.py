@@ -90,9 +90,10 @@ class LineWrappingTests(unittest.TestCase):
                     # print_line(line)
                     # render_line(line)
                     all_lines.append(line)
-            # print("==== lines ====")
+            # print("==== lines ====", len(all_lines))
             # for line in all_lines:
             #     render_line(line)
+            self.assertEqual(113,len(all_lines))
 
     # def test_links(self):
     #     with open("links.html", "r") as txt:
