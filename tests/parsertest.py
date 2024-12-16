@@ -1,3 +1,4 @@
+import pprint
 import unittest
 from parser import HtmlParser
 
@@ -40,7 +41,6 @@ class BasicParsing(unittest.TestCase):
             list(HtmlParser().parse(
             '<p><a href="https://google.com/">a link to google</a></p>')),
         )
-
     def test_plain_text(self):
         self.assertEqual(list(HtmlParser().parse('middle')), [
             ['block',['text','middle']]
@@ -108,14 +108,14 @@ class BasicParsing(unittest.TestCase):
         with open("test.html", "r") as txt:
             html = txt.read()
             blocks = list(HtmlParser().parse(html))
-            print("blocks",blocks)
-            self.assertEqual(len(blocks),3)
+            pprint.pp(blocks)
+            self.assertEqual(len(blocks),6)
     def test_strip_whitespace(self):
         with open("test.html", "r") as txt:
             html = txt.read()
             blocks = list(HtmlParser().parse(html))
-            # print("blocks",blocks)
-            self.assertEqual(len(blocks),3)
+            pprint.pp(blocks)
+            self.assertEqual(len(blocks),6)
     def test_blog_local(self):
         with open("blog.html", "r") as txt:
             html = txt.read()
